@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF & Image Suite - 100% In-Browser & Private</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Local / Client-Side Document & Image Processing Libraries -->
+    <!-- 1. PDF-Lib for PDF manipulation (Merge, Split, Embed images, Rebuild, Direct drawing) -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    
+    <!-- 2. Mozilla PDF.js for parsing and rendering PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <!-- 3. SheetJS for Excel (.xlsx / .xls / .csv) generation and parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <!-- 4. Docx.js and docx-preview for Word processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script>
+        window.docxBuilder = window.docx;
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.3/dist/docx-preview.min.js"></script>
+    <script>
+        window.docxPreviewLib = window.docxPreview || window.docx;
+        if (window.docxBuilder) {
+            window.docx = window.docxBuilder;
+        }
+    </script>
+    
+    <!-- 5. Mammoth.js for converting Word (.docx) to HTML fallback -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    
+    <!-- 6. jsPDF and AutoTable for native vector PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- 7. html2canvas & html2pdf.js for Word document HTML to PDF rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-file-shield"></i>
+            <span>PDF Suite</span>
+        </div>
+        <nav class="nav-links">
+            <a href="#" class="nav-filter active" data-filter="all">All Tools</a>
+            <a href="#" class="nav-filter" data-filter="edit">Edit PDF</a>
+            <a href="#" class="nav-filter" data-filter="from-pdf">Convert from PDF</a>
+            <a href="#" class="nav-filter" data-filter="to-pdf">Convert to PDF</a>
+            <a href="#" class="nav-filter" data-filter="organize">Organize & Optimize</a>
+        </nav>
+        <div class="security-badge">
+            <i class="fa-solid fa-lock"></i>
+            <span>100% In-Browser & Private</span>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Every tool you need to edit, convert, and compress documents</h1>
+            <p>100% Local & In-Browser. No files are uploaded to any external server or API.</p>
+        </section>
+
+        <!-- Tools Grid -->
+        <div class="tools-grid" id="tools-grid">
+            
+            <!-- EDIT PDF (FLAGSHIP TOOL) -->
+            <div class="tool-card featured-card" data-tool="edit-pdf" data-category="edit" data-accept=".pdf" data-title="Edit PDF Text & Annotate" data-action="Open in PDF Editor">
+                <div class="icon edit-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+                <h3>Edit PDF Text</h3>
+                <p>Click on existing PDF text to edit or replace it, add new text boxes, whiteout, and draw signatures.</p>
+                <span class="tool-tag tag-edit">Full PDF Editor</span>
+            </div>
+
+            <!-- CONVERT FROM PDF -->
+            <div class="tool-card" data-tool="pdf-to-word" data-category="from-pdf" data-accept=".pdf" data-title="PDF to Word" data-action="Convert to Word (.docx)">
+                <div class="icon word-icon"><i class="fa-solid fa-file-word"></i></div>
+                <h3>PDF to Word</h3>
+                <p>Convert your PDF into an editable Word document (.docx) with reconstructed tables & formatting.</p>
+                <span class="tool-tag tag-word">PDF &rarr; DOCX</span>
+            </div>
+
+            <div class="tool-card" data-tool="pdf-to-excel" data-category="from-pdf" data-accept=".pdf" data-title="PDF to Excel" data-action="Convert to Excel (.xlsx)">
+                <div class="icon excel-icon"><i class="fa-solid fa-file-excel"></i></div>
+                <h3>PDF to Excel</h3>
+                <p>Extract tabular data and text from PDF files into formatted Excel spreadsheets (.xlsx).</p>
+                <span class="tool-tag tag-excel">PDF &rarr; XLSX</span>
+            </div>
+
+            <div class="tool-card" data-tool="pdf-to-jpg" data-category="from-pdf" data-accept=".pdf" data-title="PDF to JPG" data-action="Convert to JPG Images">
+                <div class="icon image-icon"><i class="fa-solid fa-file-image"></i></div>
+                <h3>PDF to JPG</h3>
+                <p>Convert each PDF page into high-resolution JPG images in seconds.</p>
+                <span class="tool-tag tag-image">PDF &rarr; JPG</span>
+            </div>
+
+            <!-- CONVERT TO PDF -->
+            <div class="tool-card" data-tool="word-to-pdf" data-category="to-pdf" data-accept=".docx,.doc" data-title="Word to PDF" data-action="Convert to PDF">
+                <div class="icon word-icon"><i class="fa-solid fa-file-arrow-up"></i></div>
+                <h3>Word to PDF</h3>
+                <p>Convert Microsoft Word documents (.docx) into standard PDF files with ease.</p>
+                <span class="tool-tag tag-word">DOCX &rarr; PDF</span>
+            </div>
+
+            <div class="tool-card" data-tool="excel-to-pdf" data-category="to-pdf" data-accept=".xlsx,.xls,.csv" data-title="Excel to PDF" data-action="Convert to PDF">
+                <div class="icon excel-icon"><i class="fa-solid fa-table"></i></div>
+                <h3>Excel to PDF</h3>
+                <p>Transform Excel workbooks (.xlsx, .xls, .csv) into clean, vector-rendered PDF documents.</p>
+                <span class="tool-tag tag-excel">XLSX &rarr; PDF</span>
+            </div>
+
+            <div class="tool-card" data-tool="jpg-to-pdf" data-category="to-pdf" data-accept=".jpg,.jpeg,.png,.webp" data-title="JPG to PDF" data-action="Convert to PDF">
+                <div class="icon image-icon"><i class="fa-solid fa-file-pdf"></i></div>
+                <h3>JPG to PDF</h3>
+                <p>Convert JPG & PNG images to PDF. Combine multiple images into a single PDF.</p>
+                <span class="tool-tag tag-image">JPG &rarr; PDF</span>
+            </div>
+
+            <!-- ORGANIZE & OPTIMIZE -->
+            <div class="tool-card" data-tool="compress" data-category="organize" data-accept=".pdf" data-title="Compress PDF" data-action="Compress PDF">
+                <div class="icon compress-icon"><i class="fa-solid fa-file-zipper"></i></div>
+                <h3>Compress PDF</h3>
+                <p>Reduce PDF file size while optimizing for maximal visual clarity in your browser.</p>
+                <span class="tool-tag tag-compress">PDF Compress</span>
+            </div>
+
+            <div class="tool-card" data-tool="compress-image" data-category="organize" data-accept=".jpg,.jpeg,.png,.webp" data-title="Compress Image" data-action="Compress Images">
+                <div class="icon image-compress-icon"><i class="fa-solid fa-photo-film"></i></div>
+                <h3>Compress Image</h3>
+                <p>Reduce JPG, PNG, and WebP image sizes by up to 85% with client-side canvas optimization.</p>
+                <span class="tool-tag tag-image">Image Compress</span>
+            </div>
+
+            <div class="tool-card" data-tool="merge" data-category="organize" data-accept=".pdf" data-title="Merge PDF" data-action="Merge PDFs">
+                <div class="icon merge-icon"><i class="fa-solid fa-object-group"></i></div>
+                <h3>Merge PDF</h3>
+                <p>Combine multiple PDF files into one single document in the exact order you want.</p>
+                <span class="tool-tag tag-pdf">PDF Merge</span>
+            </div>
+
+            <div class="tool-card" data-tool="split" data-category="organize" data-accept=".pdf" data-title="Split PDF" data-action="Split PDF Pages">
+                <div class="icon split-icon"><i class="fa-solid fa-scissors"></i></div>
+                <h3>Split PDF</h3>
+                <p>Extract separate pages or split a PDF file into individual page files.</p>
+                <span class="tool-tag tag-pdf">PDF Split</span>
+            </div>
+
+        </div>
+
+        <!-- Tool Workspace (Hidden by default) -->
+        <div class="tool-workspace" id="tool-workspace" style="display: none;">
+            <div class="workspace-header">
+                <button id="back-btn" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to all tools</button>
+                <span class="privacy-indicator"><i class="fa-solid fa-shield-halved"></i> 100% Client-Side Processing</span>
+            </div>
+            
+            <h2 id="workspace-title">Tool Name</h2>
+            <p id="workspace-subtitle" class="workspace-subtitle">Select or drop your files below to get started</p>
+            
+            <div class="upload-area" id="upload-area">
+                <input type="file" id="file-input" multiple>
+                <div class="upload-icon-wrapper">
+                    <i class="fa-solid fa-cloud-arrow-up" id="upload-icon"></i>
+                </div>
+                <h3 id="upload-text">Select files</h3>
+                <p id="upload-hint">or drop files here</p>
+                <div class="supported-formats" id="supported-formats">Supported: PDF</div>
+            </div>
+
+            <div class="files-preview" id="files-preview"></div>
+            
+            <!-- Compression Level Options -->
+            <div id="compression-options" class="compression-options" style="display: none;">
+                <h4>Choose Compression Level</h4>
+                <div class="compression-cards">
+                    <label class="compression-card">
+                        <input type="radio" name="compression-level" value="extreme">
+                        <div class="card-content">
+                            <div class="card-icon"><i class="fa-solid fa-bolt"></i></div>
+                            <div class="card-title">Extreme Compression</div>
+                            <div class="card-desc">Highest size reduction, lower resolution / quality</div>
+                        </div>
+                    </label>
+                    <label class="compression-card selected">
+                        <input type="radio" name="compression-level" value="recommended" checked>
+                        <div class="card-content">
+                            <span class="badge-recommended">Recommended</span>
+                            <div class="card-icon"><i class="fa-solid fa-star"></i></div>
+                            <div class="card-title">Good Compression</div>
+                            <div class="card-desc">Optimal balance of high visual quality and smaller size</div>
+                        </div>
+                    </label>
+                    <label class="compression-card">
+                        <input type="radio" name="compression-level" value="low">
+                        <div class="card-content">
+                            <div class="card-icon"><i class="fa-solid fa-gem"></i></div>
+                            <div class="card-title">Less Compression</div>
+                            <div class="card-desc">Highest image fidelity, moderate size reduction</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Result Summary Card -->
+            <div id="result-card" class="result-card" style="display: none;"></div>
+
+            <div class="action-panel">
+                <button id="process-btn" class="process-btn">
+                    <span id="process-btn-text">Process Files</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <div id="processing-spinner" class="processing-spinner" style="display: none;">
+                    <div class="spinner"></div>
+                    <span id="progress-status">Processing in browser...</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FULL SCREEN INTERACTIVE PDF EDITOR STUDIO -->
+    <div id="pdf-editor-studio" class="pdf-editor-studio" style="display: none;">
+        <!-- Top Toolbar Navigation -->
+        <div class="editor-navbar">
+            <div class="editor-nav-left">
+                <button id="editor-close-btn" class="editor-nav-btn"><i class="fa-solid fa-arrow-left"></i> Exit</button>
+                <span id="editor-filename" class="editor-filename">document.pdf</span>
+            </div>
+            
+            <!-- Tool Modes Selection -->
+            <div class="editor-tools-group">
+                <button class="editor-tool-btn active" data-mode="edit-text" id="tool-mode-edit" title="Click on existing PDF text to edit it">
+                    <i class="fa-solid fa-pen-to-square"></i> <span>Edit Existing Text</span>
+                </button>
+                <button class="editor-tool-btn" data-mode="add-text" id="tool-mode-add" title="Click anywhere to add a new text box">
+                    <i class="fa-solid fa-plus"></i> <span>Add New Text</span>
+                </button>
+                <button class="editor-tool-btn" data-mode="whiteout" id="tool-mode-whiteout" title="Whiteout / Erase Text">
+                    <i class="fa-solid fa-eraser"></i> <span>Whiteout / Erase</span>
+                </button>
+                <button class="editor-tool-btn" data-mode="draw" id="tool-mode-draw" title="Draw / Sign">
+                    <i class="fa-solid fa-pen"></i> <span>Draw / Sign</span>
+                </button>
+                <button class="editor-tool-btn" data-mode="highlight" id="tool-mode-highlight" title="Highlight Text">
+                    <i class="fa-solid fa-highlighter"></i> <span>Highlight</span>
+                </button>
+            </div>
+
+            <!-- Text Formatting Properties -->
+            <div class="editor-props-group">
+                <select id="editor-font-size" class="editor-select" title="Font Size">
+                    <option value="12">12px</option>
+                    <option value="14">14px</option>
+                    <option value="16" selected>16px</option>
+                    <option value="20">20px</option>
+                    <option value="26">26px</option>
+                    <option value="34">34px</option>
+                </select>
+                <input type="color" id="editor-color-picker" value="#000000" title="Color Picker">
+                <button id="editor-bold-btn" class="editor-prop-btn" title="Bold Text"><i class="fa-solid fa-bold"></i></button>
+                <div class="editor-align-btns" style="display: flex; gap: 4px;">
+                    <button id="editor-align-left" class="editor-prop-btn active" title="Align Left (Start of Box)"><i class="fa-solid fa-align-left"></i></button>
+                    <button id="editor-align-center" class="editor-prop-btn" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+                    <button id="editor-align-right" class="editor-prop-btn" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+                </div>
+            </div>
+
+            <!-- History (Undo / Redo) -->
+            <div class="editor-history-group">
+                <button id="editor-undo-btn" class="editor-prop-btn" title="Undo (Ctrl+Z)" disabled>
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <button id="editor-redo-btn" class="editor-prop-btn" title="Redo (Ctrl+Y)" disabled>
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+
+            <!-- Page Navigation -->
+            <div class="editor-pagination">
+                <button id="editor-prev-page" class="editor-page-btn" title="Previous Page"><i class="fa-solid fa-chevron-left"></i></button>
+                <span id="editor-page-info">Page 1 / 1</span>
+                <button id="editor-next-page" class="editor-page-btn" title="Next Page"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+
+            <!-- Preview & Save / Download PDF Buttons -->
+            <div class="editor-nav-right">
+                <button id="editor-preview-btn" class="editor-preview-btn" title="Preview Clean Document without Editing Borders">
+                    <i class="fa-solid fa-eye"></i> <span>Preview</span>
+                </button>
+                <button id="editor-save-btn" class="editor-save-btn">
+                    <i class="fa-solid fa-download"></i> <span>Save & Download PDF</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tooltip instructions bar -->
+        <div class="editor-instruction-bar" id="editor-instruction-bar">
+            <i class="fa-solid fa-circle-info"></i>
+            <span id="editor-instruction-text">Click any existing text to edit it, or click any blank form field, table cell, or line to type into it.</span>
+        </div>
+
+        <!-- Editor Canvas Stage -->
+        <div class="editor-stage-container" id="editor-stage-container">
+            <div class="editor-page-wrapper" id="editor-page-wrapper">
+                <canvas id="editor-pdf-canvas"></canvas>
+                <canvas id="editor-draw-canvas"></canvas>
+                <div id="editor-text-overlay" class="editor-text-overlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><i class="fa-solid fa-lock"></i> All document and image processing is performed entirely within your web browser. No files are ever sent to any external server or API.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

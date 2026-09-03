@@ -1,0 +1,1245 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary-red: #E5322D;
+    --primary-hover: #D12521;
+    --word-blue: #2B579A;
+    --word-hover: #1E3F70;
+    --excel-green: #217346;
+    --excel-hover: #185533;
+    --image-purple: #7C3AED;
+    --compress-orange: #EA580C;
+    --edit-sky: #0284C7;
+    --edit-hover: #0369A1;
+    --bg-color: #F4F6F9;
+    --card-bg: #FFFFFF;
+    --text-main: #1E293B;
+    --text-light: #64748B;
+    --border-color: #E2E8F0;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.07);
+    --shadow-hover: 0 16px 32px rgba(0,0,0,0.12);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+header {
+    background-color: white;
+    padding: 16px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.logo i {
+    color: var(--primary-red);
+    font-size: 26px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.nav-filter {
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+}
+
+.nav-filter:hover {
+    background-color: #F1F5F9;
+    color: var(--primary-red);
+}
+
+.nav-filter.active {
+    background-color: #FEE2E2;
+    color: var(--primary-red);
+}
+
+.security-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #059669;
+    background-color: #ECFDF5;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #A7F3D0;
+}
+
+/* Main Layout */
+main {
+    flex: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 48px 24px;
+    width: 100%;
+}
+
+.hero {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.hero h1 {
+    font-size: 38px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: #0F172A;
+    letter-spacing: -0.5px;
+}
+
+.hero p {
+    font-size: 17px;
+    color: var(--text-light);
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+/* Tools Grid */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 24px;
+}
+
+.tool-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 28px 24px;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.tool-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-hover);
+    border-color: #CBD5E1;
+}
+
+.tool-card.featured-card {
+    border: 2px solid #38BDF8;
+    background: linear-gradient(180deg, #F0F9FF 0%, #FFFFFF 100%);
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.15);
+}
+
+.tool-card .icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 20px;
+    transition: transform 0.25s ease;
+}
+
+.tool-card:hover .icon {
+    transform: scale(1.08);
+}
+
+/* Distinct Tool Colors */
+.edit-icon {
+    background: #E0F2FE;
+    color: var(--edit-sky);
+}
+
+.merge-icon, .split-icon {
+    background: #FEE2E2;
+    color: var(--primary-red);
+}
+
+.compress-icon {
+    background: #FFEDD5;
+    color: var(--compress-orange);
+}
+
+.word-icon {
+    background: #E0E7FF;
+    color: var(--word-blue);
+}
+
+.excel-icon {
+    background: #DCFCE7;
+    color: var(--excel-green);
+}
+
+.image-icon {
+    background: #F3E8FF;
+    color: var(--image-purple);
+}
+
+.image-compress-icon {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.tool-card h3 {
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #0F172A;
+}
+
+.tool-card p {
+    font-size: 14px;
+    color: var(--text-light);
+    line-height: 1.5;
+    flex-grow: 1;
+    margin-bottom: 18px;
+}
+
+.tool-tag {
+    align-self: flex-start;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.tag-edit { background: #E0F2FE; color: var(--edit-sky); }
+.tag-word { background: #EEF2FF; color: var(--word-blue); }
+.tag-excel { background: #ECFDF5; color: var(--excel-green); }
+.tag-pdf { background: #FEF2F2; color: var(--primary-red); }
+.tag-compress { background: #FFEDD5; color: var(--compress-orange); }
+.tag-image { background: #FAF5FF; color: var(--image-purple); }
+
+/* Tool Workspace Styles */
+.tool-workspace {
+    background: white;
+    border-radius: 20px;
+    padding: 48px;
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    max-width: 850px;
+    margin: 0 auto;
+    border: 1px solid var(--border-color);
+}
+
+.workspace-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+.back-btn:hover {
+    color: var(--primary-red);
+    background-color: #F8FAFC;
+}
+
+.privacy-indicator {
+    font-size: 13px;
+    color: #059669;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.workspace-subtitle {
+    color: var(--text-light);
+    font-size: 15px;
+    margin-top: 6px;
+    margin-bottom: 30px;
+}
+
+.upload-area {
+    border: 2px dashed #CBD5E1;
+    border-radius: 16px;
+    padding: 50px 30px;
+    background-color: #F8FAFC;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    margin-bottom: 28px;
+}
+
+.upload-area:hover, .upload-area.dragover {
+    border-color: var(--primary-red);
+    background-color: #FFF5F5;
+    transform: scale(1.01);
+}
+
+.upload-area input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-icon-wrapper {
+    width: 72px;
+    height: 72px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px auto;
+    box-shadow: var(--shadow-sm);
+}
+
+.upload-icon-wrapper i {
+    font-size: 32px;
+    color: var(--primary-red);
+}
+
+.upload-area h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #1E293B;
+}
+
+.upload-area p {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.supported-formats {
+    margin-top: 14px;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748B;
+    background: #E2E8F0;
+    padding: 4px 12px;
+    border-radius: 12px;
+}
+
+.files-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 28px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.file-item {
+    background: #F8FAFC;
+    padding: 14px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+}
+
+.file-item-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-item-info i {
+    font-size: 20px;
+}
+
+.file-item .remove-file {
+    color: #94A3B8;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.file-item .remove-file:hover {
+    color: var(--primary-red);
+    background-color: #FEE2E2;
+}
+
+/* Compression Option Cards */
+.compression-options {
+    margin: 24px 0 32px 0;
+    text-align: left;
+}
+
+.compression-options h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #1E293B;
+    text-align: center;
+}
+
+.compression-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.compression-card {
+    position: relative;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+}
+
+.compression-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.compression-card:hover {
+    border-color: #CBD5E1;
+    transform: translateY(-2px);
+}
+
+.compression-card.selected {
+    border-color: var(--compress-orange);
+    background: #FFF7ED;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.15);
+}
+
+.card-icon {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: var(--compress-orange);
+}
+
+.card-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: #0F172A;
+    margin-bottom: 4px;
+}
+
+.card-desc {
+    font-size: 12px;
+    color: var(--text-light);
+    line-height: 1.4;
+}
+
+.badge-recommended {
+    position: absolute;
+    top: -10px;
+    right: 12px;
+    background: var(--compress-orange);
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Result Card */
+.result-card {
+    background: #ECFDF5;
+    border: 1px solid #6EE7B7;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    color: #065F46;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.action-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.process-btn {
+    background: var(--primary-red);
+    color: white;
+    border: none;
+    padding: 16px 44px;
+    font-size: 17px;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 14px rgba(229, 50, 45, 0.35);
+}
+
+.process-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(229, 50, 45, 0.45);
+}
+
+.process-btn:active {
+    transform: translateY(0);
+}
+
+.processing-spinner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+    padding: 14px 24px;
+    background-color: #F8FAFC;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.spinner {
+    width: 22px;
+    height: 22px;
+    border: 3px solid #E2E8F0;
+    border-top: 3px solid var(--primary-red);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* =========================================================
+   FULL SCREEN INTERACTIVE PDF EDITOR STUDIO STYLES
+   ========================================================= */
+.pdf-editor-studio {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #0F172A;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-navbar {
+    background: #1E293B;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #334155;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.editor-nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.editor-nav-btn {
+    background: #334155;
+    color: #F8FAFC;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.editor-nav-btn:hover {
+    background: #475569;
+}
+
+.editor-filename {
+    color: #94A3B8;
+    font-size: 14px;
+    font-weight: 600;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.editor-tools-group {
+    display: flex;
+    background: #0F172A;
+    padding: 4px;
+    border-radius: 10px;
+    gap: 4px;
+}
+
+.editor-tool-btn {
+    background: transparent;
+    border: none;
+    color: #94A3B8;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.editor-tool-btn:hover {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.editor-tool-btn.active {
+    background: #0284C7;
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+}
+
+.editor-props-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #0F172A;
+    padding: 6px 12px;
+    border-radius: 10px;
+}
+
+.editor-select {
+    background: #1E293B;
+    color: white;
+    border: 1px solid #334155;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#editor-color-picker {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+}
+
+.editor-prop-btn {
+    background: #1E293B;
+    color: #CBD5E1;
+    border: 1px solid #334155;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.editor-prop-btn.active {
+    background: #0284C7;
+    color: white;
+    border-color: #0284C7;
+}
+
+.editor-pagination {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #E2E8F0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.editor-page-btn {
+    background: #334155;
+    color: #F8FAFC;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.editor-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.editor-history-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #0F172A;
+    padding: 4px 6px;
+    border-radius: 10px;
+}
+
+.editor-prop-btn:disabled,
+.editor-page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.editor-preview-btn {
+    background: #334155;
+    color: #F8FAFC;
+    border: 1px solid #475569;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.editor-preview-btn:hover {
+    background: #475569;
+    color: #FFFFFF;
+}
+
+.editor-preview-btn.active {
+    background: linear-gradient(135deg, #0284C7, #0369A1) !important;
+    color: white !important;
+    border-color: #38BDF8 !important;
+    box-shadow: 0 0 14px rgba(2, 132, 199, 0.5) !important;
+}
+
+/* Preview Mode Active State */
+.pdf-editor-studio.preview-mode .editor-text-overlay {
+    pointer-events: none !important;
+}
+.pdf-editor-studio.preview-mode #editor-draw-canvas {
+    pointer-events: none !important;
+}
+.pdf-editor-studio.preview-mode .pdf-text-block {
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    pointer-events: none !important;
+    cursor: default !important;
+}
+.pdf-editor-studio.preview-mode .pdf-text-block:hover {
+    border-color: transparent !important;
+    background-color: transparent !important;
+}
+.pdf-editor-studio.preview-mode .pdf-detected-box {
+    display: none !important;
+}
+.pdf-editor-studio.preview-mode .editor-whiteout-rect {
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+}
+.pdf-editor-studio.preview-mode .editor-whiteout-delete,
+.pdf-editor-studio.preview-mode .editor-textbox-delete,
+.pdf-editor-studio.preview-mode .pdf-text-block-actions {
+    display: none !important;
+}
+.pdf-editor-studio.preview-mode .editor-textbox {
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+}
+.pdf-editor-studio.preview-mode .editor-textbox:hover {
+    border: none !important;
+    box-shadow: none !important;
+}
+.pdf-editor-studio.preview-mode .editor-tools-group,
+.pdf-editor-studio.preview-mode .editor-props-group,
+.pdf-editor-studio.preview-mode .editor-history-group {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.editor-save-btn {
+    background: #10B981;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.editor-save-btn:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.editor-instruction-bar {
+    background: #0284C7;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Editor Stage & Overlay */
+.editor-stage-container {
+    flex: 1;
+    overflow: auto;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background: #0B1120;
+}
+
+.editor-page-wrapper {
+    position: relative;
+    background: white;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    border-radius: 4px;
+    margin-bottom: 40px;
+}
+
+#editor-pdf-canvas {
+    display: block;
+}
+
+#editor-draw-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.editor-text-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+    cursor: default;
+}
+
+/* Mode-Specific Layering and Interaction Rules */
+.pdf-editor-studio[data-mode="edit-text"] .pdf-text-block {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.pdf-editor-studio[data-mode="add-text"] .editor-text-overlay {
+    cursor: text;
+}
+.pdf-editor-studio[data-mode="add-text"] .pdf-text-block {
+    pointer-events: none;
+}
+.pdf-editor-studio[data-mode="add-text"] .pdf-detected-box {
+    pointer-events: auto;
+    cursor: text;
+}
+
+.pdf-editor-studio[data-mode="whiteout"] .editor-text-overlay {
+    cursor: crosshair;
+    pointer-events: auto;
+}
+.pdf-editor-studio[data-mode="whiteout"] .pdf-text-block,
+.pdf-editor-studio[data-mode="whiteout"] .pdf-detected-box {
+    pointer-events: none;
+}
+.pdf-editor-studio[data-mode="whiteout"] .editor-whiteout-rect {
+    pointer-events: auto;
+}
+
+.pdf-editor-studio[data-mode="draw"] #editor-draw-canvas,
+.pdf-editor-studio[data-mode="highlight"] #editor-draw-canvas {
+    z-index: 30;
+    pointer-events: auto;
+    cursor: crosshair;
+}
+
+.pdf-editor-studio[data-mode="draw"] .editor-text-overlay,
+.pdf-editor-studio[data-mode="highlight"] .editor-text-overlay {
+    pointer-events: none;
+}
+
+/* Existing PDF text items interactive blocks */
+.pdf-text-block {
+    position: absolute;
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 1px 3px;
+    box-sizing: border-box;
+    transition: background-color 0.1s ease, border-color 0.1s ease;
+    user-select: text;
+    white-space: pre-wrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    color: transparent !important; /* Transparent so only the crisp PDF canvas is visible */
+    border: 1px dashed transparent;
+    z-index: 25;
+}
+
+.pdf-text-block span {
+    color: transparent !important;
+    user-select: text;
+    display: inline-block;
+    width: 100%;
+    text-align: inherit;
+}
+
+.pdf-text-block:hover {
+    background-color: rgba(2, 132, 199, 0.12) !important;
+    border-color: #0284C7 !important;
+}
+
+.pdf-text-block.has-edited, .pdf-text-block.has-edited span {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    z-index: 35;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.pdf-text-block.has-edited:hover {
+    border-color: #0284C7 !important;
+    box-shadow: 0 0 0 1.5px #0284C7;
+}
+
+.pdf-text-block.editing {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 2px solid #0284C7 !important;
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.25) !important;
+    outline: none;
+    z-index: 100;
+    min-width: 80px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.pdf-text-block-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: Arial, sans-serif;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    width: 100%;
+    min-width: 60px;
+    padding: 0 4px;
+    margin: 0;
+    text-align: left;
+}
+
+.pdf-text-block-actions {
+    position: absolute;
+    top: -34px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    background: #0F172A;
+    padding: 4px 6px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 110;
+}
+
+.pdf-action-btn {
+    border: none;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pdf-action-save {
+    background: #10B981;
+    color: white;
+}
+
+.pdf-action-save:hover {
+    background: #059669;
+}
+
+.pdf-action-cancel {
+    background: #475569;
+    color: white;
+}
+
+.pdf-action-cancel:hover {
+    background: #64748B;
+}
+
+/* Detected Form Box Interactive Overlay */
+.pdf-detected-box {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px dashed transparent;
+    border-radius: 3px;
+    z-index: 22;
+    cursor: text;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pdf-detected-box:hover {
+    background: rgba(2, 132, 199, 0.08);
+    border: 1.5px solid #0284C7;
+}
+
+.pdf-detected-box.has-content {
+    border-color: transparent;
+}
+
+/* User Added Text / Form Field Values */
+.editor-textbox {
+    position: absolute;
+    background: transparent;
+    border: 1px dashed transparent;
+    border-radius: 3px;
+    padding: 2px 6px;
+    min-width: 40px;
+    box-sizing: border-box;
+    cursor: text;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    transform: translateY(-50%);
+    transition: background-color 0.1s ease, border-color 0.1s ease;
+}
+
+.editor-textbox:hover {
+    background: rgba(2, 132, 199, 0.1);
+    border-color: #0284C7;
+}
+
+.editor-textbox.editing {
+    background: #FFFFFF !important;
+    border: 2px solid #0284C7 !important;
+    box-shadow: 0 4px 16px rgba(2, 132, 199, 0.25) !important;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.editor-textbox-content {
+    outline: none;
+    font-family: Arial, sans-serif;
+    word-break: break-word;
+    cursor: text;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.editor-textbox-delete {
+    position: absolute;
+    top: -9px;
+    right: -9px;
+    background: #E5322D;
+    color: white;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.15s;
+    z-index: 50;
+}
+
+.editor-textbox:hover .editor-textbox-delete {
+    display: flex;
+}
+
+.editor-textbox-delete:hover {
+    transform: scale(1.2);
+}
+
+/* Whiteout Rectangle Box */
+.editor-whiteout-rect {
+    position: absolute;
+    background: #FFFFFF;
+    border: 1px dashed #CBD5E1;
+    z-index: 25;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.editor-whiteout-rect.preview-whiteout {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1.5px dashed #2563EB;
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.25);
+}
+
+.editor-whiteout-rect:hover {
+    border-color: #EF4444;
+}
+
+.editor-whiteout-delete {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #EF4444;
+    color: white;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+    z-index: 30;
+    pointer-events: auto;
+}
+
+.editor-whiteout-rect:hover .editor-whiteout-delete {
+    display: flex;
+}
+
+footer {
+    background: white;
+    border-top: 1px solid var(--border-color);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: auto;
+}
+
+footer i {
+    color: #059669;
+    margin-right: 6px;
+}
+
+@media (max-width: 768px) {
+    header {
+        padding: 16px 20px;
+        flex-direction: column;
+        gap: 14px;
+    }
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+    .tool-workspace {
+        padding: 24px 16px;
+    }
+    .editor-navbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
