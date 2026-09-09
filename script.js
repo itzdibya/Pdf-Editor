@@ -165,9 +165,35 @@ function goBackToGrid() {
     selectedFiles = [];
     resultCard.style.display = 'none';
     updatePreview();
+
+    // Reset navigation tabs to "All Tools"
+    navFilters.forEach(f => f.classList.remove('active'));
+    const allFilter = document.querySelector('.nav-filter[data-filter="all"]');
+    if (allFilter) allFilter.classList.add('active');
+    document.querySelectorAll('.tool-card').forEach(card => card.style.display = 'flex');
+
+    // Close PDF editor studio if open
+    if (pdfEditorStudio && pdfEditorStudio.style.display !== 'none') {
+        pdfEditorStudio.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 backBtn.addEventListener('click', goBackToGrid);
+
+// Clicking Logo navigates back to Home Page
+const headerLogo = document.getElementById('header-logo') || document.querySelector('.logo');
+if (headerLogo) {
+    headerLogo.addEventListener('click', goBackToGrid);
+    headerLogo.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            goBackToGrid();
+        }
+    });
+}
 
 // Drag and drop events
 uploadArea.addEventListener('dragover', (e) => {
