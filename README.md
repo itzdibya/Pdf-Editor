@@ -41,3 +41,8 @@ git push origin master
 ```
 
 You can view live build logs and deployment status under the **Actions** tab of your GitHub repository.
+
+---
+
+## ⚡ Auto-Sync Daemon
+A background service (`auto-sync.js` managed via PM2 as `pdf-autosync`) automatically watches for file changes in this repository, commits them, and pushes directly to GitHub.
