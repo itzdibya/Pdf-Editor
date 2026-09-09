@@ -18,6 +18,7 @@ const progressStatus = document.getElementById('progress-status');
 const supportedFormats = document.getElementById('supported-formats');
 const navFilters = document.querySelectorAll('.nav-filter');
 const compressionOptions = document.getElementById('compression-options');
+const excelOptions = document.getElementById('excel-options');
 const resultCard = document.getElementById('result-card');
 
 // PDF Editor Studio Elements
@@ -97,6 +98,14 @@ document.querySelectorAll('.tool-card').forEach(card => {
             compressionOptions.style.display = 'none';
         }
 
+        // Show/hide Excel sheet options
+        if (currentTool === 'pdf-to-excel') {
+            if (excelOptions) excelOptions.style.display = 'block';
+            workspaceSubtitle.innerText = 'Extract tables & text from multi-page PDFs into a clean, single-sheet Excel workbook';
+        } else {
+            if (excelOptions) excelOptions.style.display = 'none';
+        }
+
         // Adjust for multi-file tools
         if (currentTool === 'merge' || currentTool === 'jpg-to-pdf' || currentTool === 'compress-image') {
             fileInput.multiple = true;
@@ -136,8 +145,20 @@ document.querySelectorAll('.compression-card').forEach(card => {
     });
 });
 
+// Handle Excel Radio Selection Highlight
+document.querySelectorAll('.excel-card').forEach(card => {
+    card.addEventListener('click', () => {
+        document.querySelectorAll('.excel-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        const radio = card.querySelector('input[type="radio"]');
+        if (radio) radio.checked = true;
+    });
+});
+
 function goBackToGrid() {
     if (typeof resetSplitStudio === 'function') resetSplitStudio();
+    if (excelOptions) excelOptions.style.display = 'none';
+    if (compressionOptions) compressionOptions.style.display = 'none';
     toolWorkspace.style.display = 'none';
     toolsGrid.style.display = 'grid';
     document.querySelector('.hero').style.display = 'block';
@@ -2179,42 +2200,99 @@ async function convertPdfToExcel() {
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     
     const wb = XLSX.utils.book_new();
+    const sheetMode = document.querySelector('input[name="excel-sheet-mode"]:checked')?.value || 'single';
 
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        setProcessing(true, `Extracting tables from page ${pageNum} of ${pdf.numPages}...`);
-        const page = await pdf.getPage(pageNum);
-        const textContent = await page.getTextContent();
-        
-        const lineGroups = [];
-        textContent.items.forEach(item => {
-            if (!item.str || item.str.trim() === '') return;
-            const x = item.transform[4];
-            const y = item.transform[5];
+    if (sheetMode === 'single') {
+        const allRows = [];
 
-            let group = lineGroups.find(g => Math.abs(g.y - y) <= 4);
-            if (!group) {
-                group = { y: y, items: [] };
-                lineGroups.push(group);
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            setProcessing(true, `Extracting tables from page ${pageNum} of ${pdf.numPages}...`);
+            const page = await pdf.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            
+            const lineGroups = [];
+            textContent.items.forEach(item => {
+                if (!item.str || item.str.trim() === '') return;
+                const x = item.transform[4];
+                const y = item.transform[5];
+
+                let group = lineGroups.find(g => Math.abs(g.y - y) <= 4);
+                if (!group) {
+                    group = { y: y, items: [] };
+                    lineGroups.push(group);
+                }
+                group.items.push({ x, str: item.str });
+            });
+
+            lineGroups.sort((a, b) => b.y - a.y);
+
+            for (const group of lineGroups) {
+                group.items.sort((a, b) => a.x - b.x);
+                const rowValues = group.items.map(i => i.str.trim());
+                if (rowValues.length > 0 && rowValues.some(val => val !== '')) {
+                    allRows.push(rowValues);
+                }
             }
-            group.items.push({ x, str: item.str });
-        });
-
-        lineGroups.sort((a, b) => b.y - a.y);
-
-        const rows = [];
-        for (const group of lineGroups) {
-            group.items.sort((a, b) => a.x - b.x);
-            const rowValues = group.items.map(i => i.str.trim());
-            rows.push(rowValues);
         }
 
-        const ws = XLSX.utils.aoa_to_sheet(rows.length > 0 ? rows : [["(No text found on this page)"]]);
-        XLSX.utils.book_append_sheet(wb, ws, `Page ${pageNum}`);
+        const ws = XLSX.utils.aoa_to_sheet(allRows.length > 0 ? allRows : [["(No text found in PDF)"]]);
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    } else {
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            setProcessing(true, `Extracting tables from page ${pageNum} of ${pdf.numPages}...`);
+            const page = await pdf.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            
+            const lineGroups = [];
+            textContent.items.forEach(item => {
+                if (!item.str || item.str.trim() === '') return;
+                const x = item.transform[4];
+                const y = item.transform[5];
+
+                let group = lineGroups.find(g => Math.abs(g.y - y) <= 4);
+                if (!group) {
+                    group = { y: y, items: [] };
+                    lineGroups.push(group);
+                }
+                group.items.push({ x, str: item.str });
+            });
+
+            lineGroups.sort((a, b) => b.y - a.y);
+
+            const rows = [];
+            for (const group of lineGroups) {
+                group.items.sort((a, b) => a.x - b.x);
+                const rowValues = group.items.map(i => i.str.trim());
+                if (rowValues.length > 0 && rowValues.some(val => val !== '')) {
+                    rows.push(rowValues);
+                }
+            }
+
+            const ws = XLSX.utils.aoa_to_sheet(rows.length > 0 ? rows : [["(No text found on this page)"]]);
+            XLSX.utils.book_append_sheet(wb, ws, `Page ${pageNum}`);
+        }
     }
 
     const outBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([outBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    downloadFile(blob, `${getBaseFilename(file.name)}.xlsx`, blob.type);
+    const filename = `${getBaseFilename(file.name)}.xlsx`;
+    downloadFile(blob, filename, blob.type);
+
+    if (resultCard) {
+        resultCard.style.display = 'block';
+        const modeDesc = sheetMode === 'single'
+            ? `all <strong>${pdf.numPages}</strong> pages merged into a single worksheet`
+            : `<strong>${pdf.numPages}</strong> individual page sheets`;
+        resultCard.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px;">
+                <i class="fa-solid fa-circle-check" style="font-size: 26px; color: var(--excel-green);"></i>
+                <h3 style="margin: 0; font-size: 17px; color: #1E293B;">Excel File Converted Successfully!</h3>
+            </div>
+            <p style="color: #64748B; font-size: 14px; margin: 0;">
+                Saved <strong>${filename}</strong> with ${modeDesc}.
+            </p>
+        `;
+    }
 }
 
 // =========================================================

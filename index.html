@@ -210,6 +210,30 @@
                 </div>
             </div>
 
+            <!-- Excel Sheet Export Options -->
+            <div id="excel-options" class="excel-options" style="display: none;">
+                <h4>Choose Excel Sheet Format</h4>
+                <div class="excel-cards">
+                    <label class="excel-card selected">
+                        <input type="radio" name="excel-sheet-mode" value="single" checked>
+                        <div class="card-content">
+                            <span class="badge-recommended" style="background: var(--excel-green); color: white;">Default</span>
+                            <div class="card-icon" style="color: var(--excel-green);"><i class="fa-solid fa-table"></i></div>
+                            <div class="card-title">Single Sheet</div>
+                            <div class="card-desc">Merges all PDF pages sequentially into one continuous worksheet</div>
+                        </div>
+                    </label>
+                    <label class="excel-card">
+                        <input type="radio" name="excel-sheet-mode" value="multi">
+                        <div class="card-content">
+                            <div class="card-icon" style="color: #64748B;"><i class="fa-solid fa-layer-group"></i></div>
+                            <div class="card-title">Separate Sheets</div>
+                            <div class="card-desc">Creates an individual sheet/tab for each page (Page 1, Page 2...)</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
             <!-- Split & Delete PDF Pages Interactive Panel -->
             <div id="split-workspace-panel" class="split-workspace-panel" style="display: none;">
                 <!-- Document Info & Stats Bar -->

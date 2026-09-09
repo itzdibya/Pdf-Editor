@@ -499,6 +499,58 @@ main {
     letter-spacing: 0.5px;
 }
 
+/* Excel Sheet Export Option Cards */
+.excel-options {
+    margin: 24px 0 32px 0;
+    text-align: left;
+}
+
+.excel-options h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #1E293B;
+    text-align: center;
+}
+
+.excel-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.excel-card {
+    position: relative;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+}
+
+.excel-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.excel-card:hover {
+    border-color: #CBD5E1;
+    transform: translateY(-2px);
+}
+
+.excel-card.selected {
+    border-color: var(--excel-green);
+    background-color: #F0FDF4;
+}
+
+.excel-card .card-icon {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
 /* Result Card */
 .result-card {
     background: #ECFDF5;
