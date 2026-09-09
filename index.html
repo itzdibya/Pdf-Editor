@@ -147,11 +147,11 @@
                 <span class="tool-tag tag-pdf">PDF Merge</span>
             </div>
 
-            <div class="tool-card" data-tool="split" data-category="organize" data-accept=".pdf" data-title="Split PDF" data-action="Split PDF Pages">
+            <div class="tool-card" data-tool="split" data-category="organize" data-accept=".pdf" data-title="Split & Delete PDF Pages" data-action="Organize & Split Pages">
                 <div class="icon split-icon"><i class="fa-solid fa-scissors"></i></div>
-                <h3>Split PDF</h3>
-                <p>Extract separate pages or split a PDF file into individual page files.</p>
-                <span class="tool-tag tag-pdf">PDF Split</span>
+                <h3>Split & Delete Pages</h3>
+                <p>Delete unwanted pages, extract custom page ranges, or split a PDF into separate files.</p>
+                <span class="tool-tag tag-pdf">PDF Split & Delete</span>
             </div>
 
         </div>
@@ -207,6 +207,67 @@
                             <div class="card-desc">Highest image fidelity, moderate size reduction</div>
                         </div>
                     </label>
+                </div>
+            </div>
+
+            <!-- Split & Delete PDF Pages Interactive Panel -->
+            <div id="split-workspace-panel" class="split-workspace-panel" style="display: none;">
+                <!-- Document Info & Stats Bar -->
+                <div class="split-info-bar">
+                    <div class="split-doc-details">
+                        <div class="split-file-badge">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <span id="split-file-name">document.pdf</span>
+                        </div>
+                        <button id="split-change-file-btn" class="split-text-btn" title="Choose a different PDF">
+                            <i class="fa-solid fa-arrow-rotate-left"></i> Change PDF
+                        </button>
+                    </div>
+                    <div class="split-stats-pills">
+                        <span class="split-pill split-pill-total"><i class="fa-solid fa-layer-group"></i> Total: <strong id="split-total-count">0</strong></span>
+                        <span class="split-pill split-pill-kept"><i class="fa-solid fa-circle-check"></i> Kept: <strong id="split-kept-count">0</strong></span>
+                        <span class="split-pill split-pill-deleted"><i class="fa-solid fa-trash-can"></i> Deleted: <strong id="split-deleted-count">0</strong></span>
+                    </div>
+                </div>
+
+                <!-- Split Controls & Range Actions Bar -->
+                <div class="split-toolbar">
+                    <div class="split-batch-actions">
+                        <button type="button" id="split-select-all" class="split-tool-btn" title="Select all pages"><i class="fa-solid fa-check-double"></i> Select All</button>
+                        <button type="button" id="split-deselect-all" class="split-tool-btn" title="Deselect all pages"><i class="fa-solid fa-xmark"></i> Deselect All</button>
+                        <button type="button" id="split-delete-selected" class="split-tool-btn btn-danger" title="Mark selected pages for deletion"><i class="fa-solid fa-trash"></i> Delete Selected</button>
+                        <button type="button" id="split-restore-all" class="split-tool-btn btn-restore" title="Restore all deleted pages"><i class="fa-solid fa-rotate-left"></i> Restore All</button>
+                    </div>
+
+                    <div class="split-range-box">
+                        <label for="split-range-input"><i class="fa-solid fa-filter"></i> Page Range:</label>
+                        <div class="split-range-group">
+                            <input type="text" id="split-range-input" placeholder="e.g. 2, 4-6" title="Enter page numbers separated by commas or dash (e.g. 2, 4-6)">
+                            <button type="button" id="split-range-delete" class="split-range-btn btn-range-del" title="Delete pages in range">Delete</button>
+                            <button type="button" id="split-range-keep" class="split-range-btn btn-range-keep" title="Keep only pages in range">Keep Only</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Helper Hint -->
+                <div class="split-hint-banner">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Click the <strong><i class="fa-solid fa-trash"></i> Delete</strong> button on any page thumbnail to remove it from your new PDF. You can restore deleted pages anytime before exporting.</span>
+                </div>
+
+                <!-- Pages Grid -->
+                <div id="split-pages-grid" class="split-pages-grid"></div>
+
+                <!-- Split Action Footer -->
+                <div class="split-action-footer">
+                    <button type="button" id="split-download-pdf-btn" class="split-cta-btn">
+                        <i class="fa-solid fa-file-arrow-down"></i>
+                        <span id="split-download-btn-text">Download New PDF (0 Pages)</span>
+                    </button>
+                    <button type="button" id="split-export-individual-btn" class="split-secondary-btn" title="Extract each kept page as an individual PDF file">
+                        <i class="fa-solid fa-scissors"></i>
+                        <span>Split Kept Pages into Separate Files</span>
+                    </button>
                 </div>
             </div>
 

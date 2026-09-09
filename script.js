@@ -106,6 +106,9 @@ document.querySelectorAll('.tool-card').forEach(card => {
         } else if (currentTool === 'edit-pdf') {
             fileInput.multiple = false;
             workspaceSubtitle.innerText = 'Upload your PDF to edit text, erase content, or add notes and signatures';
+        } else if (currentTool === 'split') {
+            fileInput.multiple = false;
+            workspaceSubtitle.innerText = 'Upload a multi-page PDF to delete pages, extract custom ranges, or split files';
         } else if (currentTool !== 'compress') {
             fileInput.multiple = false;
             workspaceSubtitle.innerText = 'Select or drop your file to convert completely offline';
@@ -118,6 +121,7 @@ document.querySelectorAll('.tool-card').forEach(card => {
         // Reset state
         selectedFiles = [];
         resultCard.style.display = 'none';
+        if (typeof resetSplitStudio === 'function') resetSplitStudio();
         updatePreview();
     });
 });
@@ -133,6 +137,7 @@ document.querySelectorAll('.compression-card').forEach(card => {
 });
 
 function goBackToGrid() {
+    if (typeof resetSplitStudio === 'function') resetSplitStudio();
     toolWorkspace.style.display = 'none';
     toolsGrid.style.display = 'grid';
     document.querySelector('.hero').style.display = 'block';
@@ -174,6 +179,13 @@ function handleFiles(files) {
     } else {
         selectedFiles = [files[0]];
     }
+
+    // Interactive Split & Delete Studio
+    if (currentTool === 'split' && selectedFiles.length > 0) {
+        initSplitStudio(selectedFiles[0]);
+        return;
+    }
+
     updatePreview();
 
     // Auto-open PDF editor when in edit mode
@@ -193,6 +205,10 @@ function getFileIcon(filename) {
 
 function updatePreview() {
     filesPreview.innerHTML = '';
+    if (currentTool === 'split' && selectedFiles.length > 0) {
+        return;
+    }
+
     if (selectedFiles.length > 0) {
         processBtn.style.display = 'inline-flex';
         uploadArea.style.display = 'none';
@@ -2592,20 +2608,525 @@ async function mergePDFs() {
 }
 
 // =========================================================
-// 10. SPLIT PDF - IN-BROWSER
+// 10. SPLIT & DELETE PDF PAGES STUDIO - IN-BROWSER
 // =========================================================
-async function splitPDF() {
-    const { PDFDocument } = PDFLib;
-    const file = selectedFiles[0];
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await PDFDocument.load(arrayBuffer);
+
+// Studio DOM Elements
+const splitWorkspacePanel = document.getElementById('split-workspace-panel');
+const splitFileName = document.getElementById('split-file-name');
+const splitChangeFileBtn = document.getElementById('split-change-file-btn');
+const splitTotalCount = document.getElementById('split-total-count');
+const splitKeptCount = document.getElementById('split-kept-count');
+const splitDeletedCount = document.getElementById('split-deleted-count');
+const splitSelectAllBtn = document.getElementById('split-select-all');
+const splitDeselectAllBtn = document.getElementById('split-deselect-all');
+const splitDeleteSelectedBtn = document.getElementById('split-delete-selected');
+const splitRestoreAllBtn = document.getElementById('split-restore-all');
+const splitRangeInput = document.getElementById('split-range-input');
+const splitRangeDeleteBtn = document.getElementById('split-range-delete');
+const splitRangeKeepBtn = document.getElementById('split-range-keep');
+const splitPagesGrid = document.getElementById('split-pages-grid');
+const splitDownloadPdfBtn = document.getElementById('split-download-pdf-btn');
+const splitDownloadBtnText = document.getElementById('split-download-btn-text');
+const splitExportIndividualBtn = document.getElementById('split-export-individual-btn');
+
+// Studio State
+let splitState = {
+    file: null,
+    arrayBuffer: null,
+    pdfDoc: null,        // PDF.js Document for rendering thumbnails
+    pdfLibDoc: null,     // PDF-Lib Document for lossless manipulation
+    totalPages: 0,
+    deletedPages: new Set(),   // 1-based page numbers marked as deleted
+    selectedPages: new Set(),  // 1-based page numbers selected for batch actions
+    renderSessionId: 0
+};
+
+function resetSplitStudio() {
+    splitState.renderSessionId++;
+    splitState.file = null;
+    splitState.arrayBuffer = null;
+    splitState.pdfDoc = null;
+    splitState.pdfLibDoc = null;
+    splitState.totalPages = 0;
+    splitState.deletedPages.clear();
+    splitState.selectedPages.clear();
+
+    if (splitWorkspacePanel) splitWorkspacePanel.style.display = 'none';
+    if (splitPagesGrid) splitPagesGrid.innerHTML = '';
+    if (splitRangeInput) splitRangeInput.value = '';
+    toolWorkspace.classList.remove('wide-mode');
+}
+
+async function initSplitStudio(file) {
+    if (!file) return;
     
-    for (let i = 0; i < pdf.getPageCount(); i++) {
-        const newPdf = await PDFDocument.create();
-        const [copiedPage] = await newPdf.copyPages(pdf, [i]);
-        newPdf.addPage(copiedPage);
-        const newPdfBytes = await newPdf.save();
-        downloadFile(newPdfBytes, `${getBaseFilename(file.name)}_page_${i + 1}.pdf`, 'application/pdf');
+    // Validate file type
+    if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+        alert('Please select a valid PDF file.');
+        return;
+    }
+
+    try {
+        setProcessing(true, 'Analyzing PDF document & loading pages...');
+        splitState.file = file;
+        splitState.renderSessionId++;
+        const currentSession = splitState.renderSessionId;
+
+        // Read ArrayBuffer
+        splitState.arrayBuffer = await file.arrayBuffer();
+
+        // Load into PDF-Lib and PDF.js in parallel
+        const [pdfLibDoc, pdfjsDoc] = await Promise.all([
+            PDFLib.PDFDocument.load(splitState.arrayBuffer, { ignoreEncryption: true }),
+            pdfjsLib.getDocument({ data: splitState.arrayBuffer.slice(0) }).promise
+        ]);
+
+        splitState.pdfLibDoc = pdfLibDoc;
+        splitState.pdfDoc = pdfjsDoc;
+        splitState.totalPages = pdfjsDoc.numPages;
+        splitState.deletedPages.clear();
+        splitState.selectedPages.clear();
+
+        if (splitState.totalPages === 0) {
+            throw new Error('This PDF has no readable pages.');
+        }
+
+        // Setup UI
+        uploadArea.style.display = 'none';
+        filesPreview.style.display = 'none';
+        processBtn.style.display = 'none';
+        toolWorkspace.classList.add('wide-mode');
+        splitWorkspacePanel.style.display = 'flex';
+
+        const sizeFormatted = file.size > 1024 * 1024 
+            ? (file.size / (1024 * 1024)).toFixed(2) + ' MB'
+            : (file.size / 1024).toFixed(1) + ' KB';
+        splitFileName.innerText = `${file.name} (${sizeFormatted})`;
+
+        renderSplitGridPlaceholders();
+        updateSplitUI();
+        setProcessing(false);
+
+        // Progressively render page canvas thumbnails
+        renderAllSplitThumbnails(currentSession);
+
+    } catch (err) {
+        console.error('Failed to load PDF in Split Studio:', err);
+        setProcessing(false);
+        alert(`Could not load PDF: ${err.message || err}`);
+        resetSplitStudio();
+        updatePreview();
+    }
+}
+
+function renderSplitGridPlaceholders() {
+    splitPagesGrid.innerHTML = '';
+    const total = splitState.totalPages;
+
+    for (let pageNum = 1; pageNum <= total; pageNum++) {
+        const card = document.createElement('div');
+        card.className = 'split-page-card';
+        card.id = `split-page-card-${pageNum}`;
+        card.dataset.page = pageNum;
+
+        card.innerHTML = `
+            <div class="split-card-header">
+                <label for="split-chk-${pageNum}">
+                    <input type="checkbox" id="split-chk-${pageNum}" class="split-card-checkbox" data-page="${pageNum}">
+                    <span>Page ${pageNum}</span>
+                </label>
+                <span class="split-page-badge" id="split-badge-${pageNum}">#${pageNum} of ${total}</span>
+            </div>
+            <div class="split-card-preview" id="split-preview-${pageNum}" data-page="${pageNum}" title="Click to select / restore">
+                <div class="card-skeleton">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <span>Loading page ${pageNum}...</span>
+                </div>
+            </div>
+            <div class="split-card-footer">
+                <button type="button" class="split-card-action-btn btn-card-del" id="split-action-btn-${pageNum}" data-page="${pageNum}" title="Remove page ${pageNum} from final PDF">
+                    <i class="fa-solid fa-trash"></i> <span>Delete Page</span>
+                </button>
+            </div>
+        `;
+
+        // Selection checkbox event
+        const chk = card.querySelector('.split-card-checkbox');
+        chk.addEventListener('change', (e) => {
+            e.stopPropagation();
+            if (chk.checked) {
+                splitState.selectedPages.add(pageNum);
+            } else {
+                splitState.selectedPages.delete(pageNum);
+            }
+            updateSplitCardVisualState(pageNum);
+        });
+
+        // Preview container click
+        const preview = card.querySelector('.split-card-preview');
+        preview.addEventListener('click', () => {
+            if (splitState.deletedPages.has(pageNum)) {
+                // Restore page if it was deleted
+                toggleDeletePage(pageNum);
+            } else {
+                // Toggle selection
+                chk.checked = !chk.checked;
+                chk.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Delete / Restore button
+        const actionBtn = card.querySelector('.split-card-action-btn');
+        actionBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDeletePage(pageNum);
+        });
+
+        splitPagesGrid.appendChild(card);
+    }
+}
+
+async function renderAllSplitThumbnails(sessionId) {
+    if (!splitState.pdfDoc) return;
+
+    for (let p = 1; p <= splitState.totalPages; p++) {
+        // If user changed document in between, abort this session
+        if (splitState.renderSessionId !== sessionId) break;
+
+        try {
+            const page = await splitState.pdfDoc.getPage(p);
+            // Scale 0.45 produces crisp, memory-efficient previews
+            const viewport = page.getViewport({ scale: 0.45 });
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+            if (splitState.renderSessionId !== sessionId) break;
+
+            const previewContainer = document.getElementById(`split-preview-${p}`);
+            if (previewContainer) {
+                previewContainer.innerHTML = '';
+                previewContainer.appendChild(canvas);
+            }
+        } catch (err) {
+            console.warn(`Failed to render thumbnail for page ${p}:`, err);
+            const previewContainer = document.getElementById(`split-preview-${p}`);
+            if (previewContainer) {
+                previewContainer.innerHTML = `
+                    <div style="color: #94A3B8; font-size: 11px; text-align: center;">
+                        <i class="fa-solid fa-file-circle-exclamation" style="font-size: 24px; margin-bottom: 6px;"></i>
+                        <br>Page ${p}
+                    </div>
+                `;
+            }
+        }
+    }
+}
+
+function toggleDeletePage(pageNum) {
+    if (splitState.deletedPages.has(pageNum)) {
+        splitState.deletedPages.delete(pageNum);
+    } else {
+        splitState.deletedPages.add(pageNum);
+        // Unselect if deleted
+        splitState.selectedPages.delete(pageNum);
+    }
+    updateSplitCardVisualState(pageNum);
+    updateSplitUI();
+}
+
+function updateSplitCardVisualState(pageNum) {
+    const card = document.getElementById(`split-page-card-${pageNum}`);
+    const btn = document.getElementById(`split-action-btn-${pageNum}`);
+    const badge = document.getElementById(`split-badge-${pageNum}`);
+    const chk = document.getElementById(`split-chk-${pageNum}`);
+    if (!card || !btn) return;
+
+    const isDeleted = splitState.deletedPages.has(pageNum);
+    const isSelected = splitState.selectedPages.has(pageNum);
+
+    // Selection styling
+    if (isSelected && !isDeleted) {
+        card.classList.add('is-selected');
+    } else {
+        card.classList.remove('is-selected');
+    }
+    if (chk) {
+        chk.checked = isSelected && !isDeleted;
+        chk.disabled = isDeleted;
+    }
+
+    // Deleted styling
+    if (isDeleted) {
+        card.classList.add('is-deleted');
+        card.classList.remove('is-selected');
+        btn.className = 'split-card-action-btn btn-card-restore';
+        btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> <span>Restore Page</span>';
+        btn.title = `Restore page ${pageNum} to final PDF`;
+        if (badge) badge.innerText = 'Deleted';
+    } else {
+        card.classList.remove('is-deleted');
+        btn.className = 'split-card-action-btn btn-card-del';
+        btn.innerHTML = '<i class="fa-solid fa-trash"></i> <span>Delete Page</span>';
+        btn.title = `Remove page ${pageNum} from final PDF`;
+        if (badge) badge.innerText = `#${pageNum} of ${splitState.totalPages}`;
+    }
+}
+
+function updateAllSplitCards() {
+    for (let p = 1; p <= splitState.totalPages; p++) {
+        updateSplitCardVisualState(p);
+    }
+}
+
+function updateSplitUI() {
+    const total = splitState.totalPages;
+    const deleted = splitState.deletedPages.size;
+    const kept = Math.max(0, total - deleted);
+
+    if (splitTotalCount) splitTotalCount.innerText = total;
+    if (splitKeptCount) splitKeptCount.innerText = kept;
+    if (splitDeletedCount) splitDeletedCount.innerText = deleted;
+
+    if (kept === 0) {
+        splitDownloadBtnText.innerText = 'Download New PDF (0 Pages)';
+        splitDownloadPdfBtn.disabled = true;
+        splitExportIndividualBtn.disabled = true;
+    } else {
+        splitDownloadBtnText.innerText = `Download New PDF (${kept} ${kept === 1 ? 'Page' : 'Pages'})`;
+        splitDownloadPdfBtn.disabled = false;
+        splitExportIndividualBtn.disabled = false;
+    }
+}
+
+// Range Parser Utility
+function parseRangeExpression(inputStr, maxPages) {
+    const matched = new Set();
+    if (!inputStr || !inputStr.trim()) return matched;
+
+    const parts = inputStr.split(/[,;\s]+/);
+    for (const part of parts) {
+        if (!part) continue;
+        if (part.includes('-')) {
+            const [startStr, endStr] = part.split('-');
+            const start = parseInt(startStr, 10);
+            const end = parseInt(endStr, 10);
+            if (!isNaN(start) && !isNaN(end)) {
+                const min = Math.max(1, Math.min(start, end));
+                const max = Math.min(maxPages, Math.max(start, end));
+                for (let i = min; i <= max; i++) {
+                    matched.add(i);
+                }
+            }
+        } else {
+            const num = parseInt(part, 10);
+            if (!isNaN(num) && num >= 1 && num <= maxPages) {
+                matched.add(num);
+            }
+        }
+    }
+    return matched;
+}
+
+// Toolbar Action Listeners
+if (splitSelectAllBtn) {
+    splitSelectAllBtn.addEventListener('click', () => {
+        for (let p = 1; p <= splitState.totalPages; p++) {
+            if (!splitState.deletedPages.has(p)) {
+                splitState.selectedPages.add(p);
+            }
+        }
+        updateAllSplitCards();
+    });
+}
+
+if (splitDeselectAllBtn) {
+    splitDeselectAllBtn.addEventListener('click', () => {
+        splitState.selectedPages.clear();
+        updateAllSplitCards();
+    });
+}
+
+if (splitDeleteSelectedBtn) {
+    splitDeleteSelectedBtn.addEventListener('click', () => {
+        if (splitState.selectedPages.size === 0) {
+            alert('Please select at least one page to delete using the checkboxes.');
+            return;
+        }
+        for (const p of splitState.selectedPages) {
+            splitState.deletedPages.add(p);
+        }
+        splitState.selectedPages.clear();
+        updateAllSplitCards();
+        updateSplitUI();
+    });
+}
+
+if (splitRestoreAllBtn) {
+    splitRestoreAllBtn.addEventListener('click', () => {
+        splitState.deletedPages.clear();
+        updateAllSplitCards();
+        updateSplitUI();
+    });
+}
+
+if (splitRangeDeleteBtn) {
+    splitRangeDeleteBtn.addEventListener('click', () => {
+        const query = (splitRangeInput.value || '').trim();
+        const pages = parseRangeExpression(query, splitState.totalPages);
+        if (pages.size === 0) {
+            alert(`Please enter valid page numbers or ranges between 1 and ${splitState.totalPages} (e.g. "2, 4-6").`);
+            return;
+        }
+        for (const p of pages) {
+            splitState.deletedPages.add(p);
+            splitState.selectedPages.delete(p);
+        }
+        updateAllSplitCards();
+        updateSplitUI();
+    });
+}
+
+if (splitRangeKeepBtn) {
+    splitRangeKeepBtn.addEventListener('click', () => {
+        const query = (splitRangeInput.value || '').trim();
+        const pagesToKeep = parseRangeExpression(query, splitState.totalPages);
+        if (pagesToKeep.size === 0) {
+            alert(`Please enter valid page numbers or ranges between 1 and ${splitState.totalPages} (e.g. "1, 3, 5-7").`);
+            return;
+        }
+        splitState.deletedPages.clear();
+        for (let p = 1; p <= splitState.totalPages; p++) {
+            if (!pagesToKeep.has(p)) {
+                splitState.deletedPages.add(p);
+            }
+        }
+        splitState.selectedPages.clear();
+        updateAllSplitCards();
+        updateSplitUI();
+    });
+}
+
+if (splitChangeFileBtn) {
+    splitChangeFileBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        fileInput.click();
+    });
+}
+
+// =========================================================
+// EXPORT NEW PDF WITHOUT DELETED PAGES
+// =========================================================
+async function exportNewPdfWithoutDeletedPages() {
+    const keptPages1Based = [];
+    for (let p = 1; p <= splitState.totalPages; p++) {
+        if (!splitState.deletedPages.has(p)) {
+            keptPages1Based.push(p);
+        }
+    }
+
+    if (keptPages1Based.length === 0) {
+        alert('All pages have been deleted! Please keep at least one page to generate a new PDF.');
+        return;
+    }
+
+    setProcessing(true, `Assembling new PDF with ${keptPages1Based.length} pages in browser...`);
+
+    try {
+        const { PDFDocument } = PDFLib;
+        const newPdfDoc = await PDFDocument.create();
+
+        // Convert 1-based page numbers to 0-based indices for PDF-Lib
+        const keptIndices0Based = keptPages1Based.map(p => p - 1);
+        const copiedPages = await newPdfDoc.copyPages(splitState.pdfLibDoc, keptIndices0Based);
+
+        for (const copiedPage of copiedPages) {
+            newPdfDoc.addPage(copiedPage);
+        }
+
+        const newPdfBytes = await newPdfDoc.save();
+        const originalBase = getBaseFilename(splitState.file.name);
+        const outputFilename = `${originalBase}_edited_${keptPages1Based.length}pages.pdf`;
+
+        downloadFile(newPdfBytes, outputFilename, 'application/pdf');
+
+        // Display success card
+        resultCard.style.display = 'block';
+        resultCard.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px;">
+                <i class="fa-solid fa-circle-check" style="font-size: 28px; color: #16A34A;"></i>
+                <h3 style="margin: 0; font-size: 18px; color: #1E293B;">New PDF Ready & Downloaded!</h3>
+            </div>
+            <p style="color: #64748B; font-size: 14px; margin-bottom: 16px;">
+                Saved <strong>${outputFilename}</strong> containing <strong>${keptPages1Based.length}</strong> pages (removed ${splitState.deletedPages.size} pages).
+            </p>
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button type="button" class="split-text-btn" onclick="exportNewPdfWithoutDeletedPages()">
+                    <i class="fa-solid fa-download"></i> Download Again
+                </button>
+            </div>
+        `;
+    } catch (err) {
+        console.error('Failed to generate new PDF:', err);
+        alert(`Error generating PDF: ${err.message || err}`);
+    } finally {
+        setProcessing(false);
+    }
+}
+
+// Split into individual files for each kept page
+async function splitKeptPagesAsSeparateFiles() {
+    const keptPages1Based = [];
+    for (let p = 1; p <= splitState.totalPages; p++) {
+        if (!splitState.deletedPages.has(p)) {
+            keptPages1Based.push(p);
+        }
+    }
+
+    if (keptPages1Based.length === 0) {
+        alert('No pages to split. Please restore at least one page.');
+        return;
+    }
+
+    setProcessing(true, `Extracting ${keptPages1Based.length} separate page documents...`);
+
+    try {
+        const { PDFDocument } = PDFLib;
+        const originalBase = getBaseFilename(splitState.file.name);
+
+        for (const pageNum of keptPages1Based) {
+            const singlePdfDoc = await PDFDocument.create();
+            const [copiedPage] = await singlePdfDoc.copyPages(splitState.pdfLibDoc, [pageNum - 1]);
+            singlePdfDoc.addPage(copiedPage);
+            const singleBytes = await singlePdfDoc.save();
+            downloadFile(singleBytes, `${originalBase}_page_${pageNum}.pdf`, 'application/pdf');
+        }
+    } catch (err) {
+        console.error('Failed to split separate pages:', err);
+        alert(`Error splitting pages: ${err.message || err}`);
+    } finally {
+        setProcessing(false);
+    }
+}
+
+if (splitDownloadPdfBtn) {
+    splitDownloadPdfBtn.addEventListener('click', exportNewPdfWithoutDeletedPages);
+}
+
+if (splitExportIndividualBtn) {
+    splitExportIndividualBtn.addEventListener('click', splitKeptPagesAsSeparateFiles);
+}
+
+// Legacy splitPDF router fallback
+async function splitPDF() {
+    if (splitState.file && splitState.pdfLibDoc) {
+        await exportNewPdfWithoutDeletedPages();
+    } else if (selectedFiles.length > 0) {
+        await initSplitStudio(selectedFiles[0]);
     }
 }
 
