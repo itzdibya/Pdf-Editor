@@ -2019,20 +2019,24 @@ async function compressOfficeDocuments() {
     const levelRadio = document.querySelector('input[name="compression-level"]:checked');
     const level = levelRadio ? levelRadio.value : 'recommended';
 
-    let maxDimension = 1440;
-    let quality = 0.72;
+    // Aggressive optimization thresholds
+    let maxDimension = 1200;
+    let quality = 0.65;
     let deflateLevel = 9;
+    let convertOpaquePng = true;
     let levelLabel = 'Good Compression';
 
     if (level === 'extreme') {
-        maxDimension = 1000;
-        quality = 0.48;
+        maxDimension = 800;
+        quality = 0.40;
         deflateLevel = 9;
+        convertOpaquePng = true;
         levelLabel = 'Extreme Compression';
     } else if (level === 'low') {
-        maxDimension = 2048;
-        quality = 0.85;
+        maxDimension = 1800;
+        quality = 0.82;
         deflateLevel = 6;
+        convertOpaquePng = false;
         levelLabel = 'Less Compression';
     }
 
@@ -2043,6 +2047,23 @@ async function compressOfficeDocuments() {
     const formatSize = (bytes) => bytes > 1024 * 1024 
         ? (bytes / (1024 * 1024)).toFixed(2) + ' MB'
         : (bytes / 1024).toFixed(1) + ' KB';
+
+    // Helper: detect if a canvas contains any transparent pixels
+    function isCanvasOpaque(canvas, ctx) {
+        try {
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            const totalPixels = canvas.width * canvas.height;
+            const step = totalPixels > 250000 ? 16 : 4;
+            for (let i = 3; i < imgData.length; i += step) {
+                if (imgData[i] < 245) {
+                    return false; // Found transparent pixel
+                }
+            }
+            return true; // Completely opaque
+        } catch (e) {
+            return false;
+        }
+    }
 
     for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i];
@@ -2059,15 +2080,30 @@ async function compressOfficeDocuments() {
         // Load document zip archive
         const zip = await JSZip.loadAsync(file);
 
-        // Scan for media files (images inside word/media/, xl/media/, ppt/media/)
+        // Analyze archive contents
         const mediaEntries = [];
+        const videoAudioEntries = [];
+        const relsEntries = [];
+        let totalMediaOriginalBytes = 0;
+        let totalVideoAudioBytes = 0;
+
         zip.forEach((relativePath, zipEntry) => {
-            if (!zipEntry.dir && /\.(png|jpe?g|bmp|webp|tiff?)$/i.test(relativePath)) {
+            if (zipEntry.dir) return;
+
+            if (/\.(png|jpe?g|bmp|webp|tiff?)$/i.test(relativePath)) {
                 mediaEntries.push({ path: relativePath, entry: zipEntry });
+            } else if (/\.(mp4|mov|m4a|mp3|wav|avi|wmv|mkv|flv)$/i.test(relativePath)) {
+                videoAudioEntries.push({ path: relativePath, entry: zipEntry });
+            }
+
+            if (relativePath.endsWith('.rels')) {
+                relsEntries.push({ path: relativePath, entry: zipEntry });
             }
         });
 
         let optimizedImagesCount = 0;
+        let convertedPngToJpgCount = 0;
+        const renames = []; // { oldFileName, newFileName }
 
         if (mediaEntries.length > 0) {
             for (let m = 0; m < mediaEntries.length; m++) {
@@ -2076,6 +2112,8 @@ async function compressOfficeDocuments() {
 
                 try {
                     const rawBytes = await zipEntry.async('uint8array');
+                    totalMediaOriginalBytes += rawBytes.length;
+
                     const isJpeg = /\.(jpe?g)$/i.test(relPath);
                     const isPng = /\.png$/i.test(relPath);
 
@@ -2111,14 +2149,35 @@ async function compressOfficeDocuments() {
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        const outType = isJpeg ? 'image/jpeg' : 'image/png';
+                        let outType = isJpeg ? 'image/jpeg' : 'image/png';
+                        let canConvertToJpg = false;
+
+                        if (isPng && convertOpaquePng) {
+                            if (isCanvasOpaque(canvas, ctx)) {
+                                outType = 'image/jpeg';
+                                canConvertToJpg = true;
+                            }
+                        }
+
                         const compressedImgBlob = await new Promise(resolve => canvas.toBlob(resolve, outType, quality));
 
                         if (compressedImgBlob) {
                             const newBuffer = await compressedImgBlob.arrayBuffer();
+                            
                             // Only replace if size was reduced
                             if (newBuffer.byteLength < rawBytes.length) {
-                                zip.file(relPath, newBuffer);
+                                if (canConvertToJpg) {
+                                    const oldFileName = relPath.split('/').pop();
+                                    const newFileName = oldFileName.replace(/\.png$/i, '.jpg');
+                                    const newRelPath = relPath.replace(/\.png$/i, '.jpg');
+
+                                    zip.remove(relPath);
+                                    zip.file(newRelPath, newBuffer);
+                                    renames.push({ oldFileName, newFileName });
+                                    convertedPngToJpgCount++;
+                                } else {
+                                    zip.file(relPath, newBuffer);
+                                }
                                 optimizedImagesCount++;
                             }
                         }
@@ -2127,6 +2186,48 @@ async function compressOfficeDocuments() {
                     console.warn(`Could not optimize ${relPath}:`, imgErr);
                 }
             }
+        }
+
+        // If any PNGs were converted to JPG, update all .rels files and [Content_Types].xml
+        if (renames.length > 0) {
+            for (let r = 0; r < relsEntries.length; r++) {
+                try {
+                    let relContent = await relsEntries[r].entry.async('string');
+                    let modified = false;
+                    for (const rn of renames) {
+                        if (relContent.includes(rn.oldFileName)) {
+                            relContent = relContent.split(rn.oldFileName).join(rn.newName);
+                            modified = true;
+                        }
+                    }
+                    if (modified) {
+                        zip.file(relsEntries[r].path, relContent);
+                    }
+                } catch (rErr) {
+                    console.warn('Error updating .rels file:', rErr);
+                }
+            }
+
+            try {
+                const ctEntry = zip.file('[Content_Types].xml');
+                if (ctEntry) {
+                    let ctText = await ctEntry.async('string');
+                    if (!ctText.includes('Extension="jpg"') && !ctText.includes('Extension="jpeg"')) {
+                        ctText = ctText.replace('</Types>', '<Default Extension="jpg" ContentType="image/jpeg"/><Default Extension="jpeg" ContentType="image/jpeg"/></Types>');
+                        zip.file('[Content_Types].xml', ctText);
+                    }
+                }
+            } catch (ctErr) {
+                console.warn('Error updating [Content_Types].xml:', ctErr);
+            }
+        }
+
+        // Calculate size of any video/audio files
+        for (const vEntry of videoAudioEntries) {
+            try {
+                const vBytes = await vEntry.entry.async('uint8array');
+                totalVideoAudioBytes += vBytes.length;
+            } catch (e) {}
         }
 
         setProcessing(true, `Compressing & rebuilding ${file.name}...`);
@@ -2150,7 +2251,10 @@ async function compressOfficeDocuments() {
             compressedSize: finalBlob.size,
             blob: finalBlob,
             mime: docMime,
-            optimizedImages: optimizedImagesCount
+            optimizedImages: optimizedImagesCount,
+            convertedPngs: convertedPngToJpgCount,
+            videoAudioBytes: totalVideoAudioBytes,
+            videoAudioCount: videoAudioEntries.length
         });
 
         // Trigger download of this file
@@ -2166,9 +2270,17 @@ async function compressOfficeDocuments() {
 
     let filesSummaryHtml = processedFiles.map(f => {
         const fileSaved = f.originalSize > 0 ? Math.max(0, Math.round(((f.originalSize - f.compressedSize) / f.originalSize) * 100)) : 0;
-        return `<div style="display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed #A7F3D0;">
-            <span><i class="fa-solid fa-file"></i> <strong>${f.name}</strong></span>
-            <span>${formatSize(f.originalSize)} &rarr; ${formatSize(f.compressedSize)} <strong style="color: #059669;">(-${fileSaved}%)</strong></span>
+        let detailHints = [];
+        if (f.optimizedImages > 0) detailHints.push(`${f.optimizedImages} image${f.optimizedImages > 1 ? 's' : ''} optimized`);
+        if (f.convertedPngs > 0) detailHints.push(`${f.convertedPngs} opaque PNG${f.convertedPngs > 1 ? 's' : ''} converted to JPG`);
+        if (f.videoAudioCount > 0) detailHints.push(`Notice: ${f.videoAudioCount} embedded video/audio (${formatSize(f.videoAudioBytes)}) preserved`);
+
+        return `<div style="display: flex; flex-direction: column; gap: 4px; width: 100%; font-size: 13px; padding: 6px 0; border-bottom: 1px dashed #A7F3D0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span><i class="fa-solid fa-file"></i> <strong>${f.name}</strong></span>
+                <span>${formatSize(f.originalSize)} &rarr; ${formatSize(f.compressedSize)} <strong style="color: #059669;">(-${fileSaved}%)</strong></span>
+            </div>
+            ${detailHints.length > 0 ? `<div style="font-size: 12px; color: #047857; margin-left: 20px;"><i class="fa-solid fa-circle-info"></i> ${detailHints.join(' &bull; ')}</div>` : ''}
         </div>`;
     }).join('');
 
