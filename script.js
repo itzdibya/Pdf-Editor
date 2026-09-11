@@ -34,6 +34,8 @@ const editorAlignCenter = document.getElementById('editor-align-center');
 const editorAlignRight = document.getElementById('editor-align-right');
 const editorPrevPage = document.getElementById('editor-prev-page');
 const editorNextPage = document.getElementById('editor-next-page');
+const editorZoomOutBtn = document.getElementById('editor-zoom-out');
+const editorZoomInBtn = document.getElementById('editor-zoom-in');
 const editorPageInfo = document.getElementById('editor-page-info');
 const editorSaveBtn = document.getElementById('editor-save-btn');
 const editorPreviewBtn = document.getElementById('editor-preview-btn');
@@ -602,6 +604,15 @@ async function launchPdfEditor() {
             past: [takeSnapshot(i)],
             future: []
         };
+    }
+
+    // Adaptive scale for mobile devices and small viewports
+    if (window.innerWidth <= 480) {
+        editorState.scale = 0.9;
+    } else if (window.innerWidth <= 768) {
+        editorState.scale = 1.15;
+    } else {
+        editorState.scale = 1.5;
     }
 
     pdfEditorStudio.style.display = 'flex';
