@@ -1,0 +1,23 @@
+{
+  "name": "pdf-editor",
+  "version": "1.0.0",
+  "description": "PDF & Image Suite - 100% In-Browser & Private document processing",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itzdibya/Pdf-Editor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/itzdibya/Pdf-Editor/issues"
+  },
+  "homepage": "https://github.com/itzdibya/Pdf-Editor#readme",
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
+  }
+}
