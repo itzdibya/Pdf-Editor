@@ -2005,6 +2005,188 @@ async function compressPdf() {
 }
 
 // =========================================================
+// 2B. OFFICE DOCUMENT COMPRESSION (.DOCX, .XLSX, .PPTX) - IN-BROWSER
+// =========================================================
+async function compressOfficeDocuments() {
+    if (!selectedFiles || selectedFiles.length === 0) {
+        throw new Error('Please select at least one .docx, .xlsx, or .pptx file.');
+    }
+
+    if (typeof JSZip === 'undefined') {
+        throw new Error('JSZip library is not loaded. Please refresh the page.');
+    }
+
+    const levelRadio = document.querySelector('input[name="compression-level"]:checked');
+    const level = levelRadio ? levelRadio.value : 'recommended';
+
+    let maxDimension = 1440;
+    let quality = 0.72;
+    let deflateLevel = 9;
+    let levelLabel = 'Good Compression';
+
+    if (level === 'extreme') {
+        maxDimension = 1000;
+        quality = 0.48;
+        deflateLevel = 9;
+        levelLabel = 'Extreme Compression';
+    } else if (level === 'low') {
+        maxDimension = 2048;
+        quality = 0.85;
+        deflateLevel = 6;
+        levelLabel = 'Less Compression';
+    }
+
+    let totalOriginal = 0;
+    let totalCompressed = 0;
+    const processedFiles = [];
+
+    const formatSize = (bytes) => bytes > 1024 * 1024 
+        ? (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+        : (bytes / 1024).toFixed(1) + ' KB';
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const ext = file.name.split('.').pop().toLowerCase();
+
+        setProcessing(true, `Reading ${file.name} (${i + 1} of ${selectedFiles.length})...`);
+        totalOriginal += file.size;
+
+        let docMime = 'application/octet-stream';
+        if (ext === 'docx') docMime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        else if (ext === 'xlsx') docMime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        else if (ext === 'pptx') docMime = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+
+        // Load document zip archive
+        const zip = await JSZip.loadAsync(file);
+
+        // Scan for media files (images inside word/media/, xl/media/, ppt/media/)
+        const mediaEntries = [];
+        zip.forEach((relativePath, zipEntry) => {
+            if (!zipEntry.dir && /\.(png|jpe?g|bmp|webp|tiff?)$/i.test(relativePath)) {
+                mediaEntries.push({ path: relativePath, entry: zipEntry });
+            }
+        });
+
+        let optimizedImagesCount = 0;
+
+        if (mediaEntries.length > 0) {
+            for (let m = 0; m < mediaEntries.length; m++) {
+                const { path: relPath, entry: zipEntry } = mediaEntries[m];
+                setProcessing(true, `Optimizing media in ${file.name} (${m + 1} of ${mediaEntries.length})...`);
+
+                try {
+                    const rawBytes = await zipEntry.async('uint8array');
+                    const isJpeg = /\.(jpe?g)$/i.test(relPath);
+                    const isPng = /\.png$/i.test(relPath);
+
+                    const mimeType = isJpeg ? 'image/jpeg' : (isPng ? 'image/png' : 'image/webp');
+                    const imgBlob = new Blob([rawBytes], { type: mimeType });
+                    const imgUrl = URL.createObjectURL(imgBlob);
+
+                    const img = new Image();
+                    const loaded = await new Promise((resolve) => {
+                        img.onload = () => resolve(true);
+                        img.onerror = () => resolve(false);
+                        img.src = imgUrl;
+                    });
+                    URL.revokeObjectURL(imgUrl);
+
+                    if (loaded && img.width > 0 && img.height > 0) {
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxDimension || height > maxDimension) {
+                            if (width > height) {
+                                height = Math.round((height * maxDimension) / width);
+                                width = maxDimension;
+                            } else {
+                                width = Math.round((width * maxDimension) / height);
+                                height = maxDimension;
+                            }
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const outType = isJpeg ? 'image/jpeg' : 'image/png';
+                        const compressedImgBlob = await new Promise(resolve => canvas.toBlob(resolve, outType, quality));
+
+                        if (compressedImgBlob) {
+                            const newBuffer = await compressedImgBlob.arrayBuffer();
+                            // Only replace if size was reduced
+                            if (newBuffer.byteLength < rawBytes.length) {
+                                zip.file(relPath, newBuffer);
+                                optimizedImagesCount++;
+                            }
+                        }
+                    }
+                } catch (imgErr) {
+                    console.warn(`Could not optimize ${relPath}:`, imgErr);
+                }
+            }
+        }
+
+        setProcessing(true, `Compressing & rebuilding ${file.name}...`);
+        const compressedBlob = await zip.generateAsync({
+            type: 'blob',
+            mimeType: docMime,
+            compression: 'DEFLATE',
+            compressionOptions: { level: deflateLevel }
+        }, (metadata) => {
+            setProcessing(true, `Rebuilding ${file.name} (${Math.round(metadata.percent)}%)...`);
+        });
+
+        // Ensure we don't return a file larger than original
+        const finalBlob = (compressedBlob.size <= file.size) ? compressedBlob : file;
+        totalCompressed += finalBlob.size;
+
+        const outName = `${getBaseFilename(file.name)}_compressed.${ext}`;
+        processedFiles.push({
+            name: outName,
+            originalSize: file.size,
+            compressedSize: finalBlob.size,
+            blob: finalBlob,
+            mime: docMime,
+            optimizedImages: optimizedImagesCount
+        });
+
+        // Trigger download of this file
+        downloadFile(finalBlob, outName, docMime);
+    }
+
+    const savedBytes = Math.max(0, totalOriginal - totalCompressed);
+    const savedPercent = totalOriginal > 0 ? Math.round((savedBytes / totalOriginal) * 100) : 0;
+
+    resultCard.style.display = 'flex';
+    resultCard.style.flexDirection = 'column';
+    resultCard.style.gap = '12px';
+
+    let filesSummaryHtml = processedFiles.map(f => {
+        const fileSaved = f.originalSize > 0 ? Math.max(0, Math.round(((f.originalSize - f.compressedSize) / f.originalSize) * 100)) : 0;
+        return `<div style="display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed #A7F3D0;">
+            <span><i class="fa-solid fa-file"></i> <strong>${f.name}</strong></span>
+            <span>${formatSize(f.originalSize)} &rarr; ${formatSize(f.compressedSize)} <strong style="color: #059669;">(-${fileSaved}%)</strong></span>
+        </div>`;
+    }).join('');
+
+    resultCard.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 24px; color: #059669;"></i>
+            <div>
+                <strong style="font-size: 15px; color: #065F46;">Office Compression Complete (${levelLabel})!</strong>
+                <p style="margin: 2px 0 0 0; font-size: 13px; color: #047857;">Total: ${formatSize(totalOriginal)} &rarr; ${formatSize(totalCompressed)} (${savedPercent}% size reduction across ${processedFiles.length} file${processedFiles.length > 1 ? 's' : ''})</p>
+            </div>
+        </div>
+        <div style="width: 100%; margin-top: 4px;">
+            ${filesSummaryHtml}
+        </div>
+    `;
+}
+
+// =========================================================
 // 3. PDF TO WORD (.DOCX) - IN-BROWSER
 // =========================================================
 async function convertPdfToWord() {
