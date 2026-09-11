@@ -219,16 +219,109 @@ fileInput.addEventListener('change', (e) => {
     handleFiles(e.target.files);
 });
 
-function handleFiles(files) {
+// =========================================================
+// Strict Schema Input Validation System
+// Validates type, length/size, and binary format/signatures; rejects non-matching inputs
+// =========================================================
+const STRICT_INPUT_SCHEMAS = {
+    file: {
+        maxSizeBytes: 100 * 1024 * 1024, // 100 MB max
+        minSizeBytes: 1,                 // 1 byte min (reject empty files)
+        tools: {
+            'edit-pdf': { extensions: ['pdf'], mimeTypes: ['application/pdf'], magic: [[0x25, 0x50, 0x44, 0x46]] },
+            'merge': { extensions: ['pdf'], mimeTypes: ['application/pdf'], magic: [[0x25, 0x50, 0x44, 0x46]] },
+            'split': { extensions: ['pdf'], mimeTypes: ['application/pdf'], magic: [[0x25, 0x50, 0x44, 0x46]] },
+            'compress': { extensions: ['pdf'], mimeTypes: ['application/pdf'], magic: [[0x25, 0x50, 0x44, 0x46]] },
+            'pdf-to-word': { extensions: ['pdf'], mimeTypes: ['application/pdf'], magic: [[0x25, 0x50, 0x44, 0x46]] },
+            'pdf-to-excel': { extensions: ['pdf'], mimeTypes: ['application/pdf'], magic: [[0x25, 0x50, 0x44, 0x46]] },
+            'pdf-to-jpg': { extensions: ['pdf'], mimeTypes: ['application/pdf'], magic: [[0x25, 0x50, 0x44, 0x46]] },
+            'word-to-pdf': { extensions: ['docx', 'doc'], mimeTypes: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'application/zip'], magic: [[0x50, 0x4B, 0x03, 0x04], [0xD0, 0xCF, 0x11, 0xE0]] },
+            'excel-to-pdf': { extensions: ['xlsx', 'xls', 'csv'], mimeTypes: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv', 'application/csv', 'application/zip', 'text/plain'], magic: [[0x50, 0x4B, 0x03, 0x04], [0xD0, 0xCF, 0x11, 0xE0]] },
+            'jpg-to-pdf': { extensions: ['jpg', 'jpeg', 'png', 'webp'], mimeTypes: ['image/jpeg', 'image/png', 'image/webp'], magic: [[0xFF, 0xD8, 0xFF], [0x89, 0x50, 0x4E, 0x47], [0x52, 0x49, 0x46, 0x46]] },
+            'compress-image': { extensions: ['jpg', 'jpeg', 'png', 'webp'], mimeTypes: ['image/jpeg', 'image/png', 'image/webp'], magic: [[0xFF, 0xD8, 0xFF], [0x89, 0x50, 0x4E, 0x47], [0x52, 0x49, 0x46, 0x46]] },
+            'compress-office': { extensions: ['docx', 'xlsx', 'pptx'], mimeTypes: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip'], magic: [[0x50, 0x4B, 0x03, 0x04]] }
+        }
+    },
+    pageRange: {
+        maxLength: 200,
+        pattern: /^(?:[1-9]\d*(?:-[1-9]\d*)?)(?:\s*,\s*[1-9]\d*(?:-[1-9]\d*))*$/
+    },
+    editor: {
+        fontSize: { min: 6, max: 144 },
+        colorPattern: /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/,
+        textMaxLength: 5000
+    }
+};
+
+async function validateFileInputStrict(file, toolId) {
+    if (!file || !(file instanceof File || file instanceof Blob)) {
+        throw new Error('Input Validation Rejected: Selected item is not a valid file object.');
+    }
+
+    const schema = (toolId && STRICT_INPUT_SCHEMAS.file.tools[toolId]) 
+        ? STRICT_INPUT_SCHEMAS.file.tools[toolId] 
+        : { extensions: ['pdf'], mimeTypes: ['application/pdf'], magic: [[0x25, 0x50, 0x44, 0x46]] };
+    
+    const name = file.name || 'document';
+    const ext = name.includes('.') ? name.split('.').pop().toLowerCase() : '';
+
+    // 1. Strict extension type validation
+    if (!ext || !schema.extensions.includes(ext)) {
+        throw new Error(`Input Validation Rejected: File "${name}" has unsupported format (.${ext || 'unknown'}). Expected format: ${schema.extensions.map(e => '.' + e).join(', ')}.`);
+    }
+
+    // 2. Strict size length validation
+    if (file.size < STRICT_INPUT_SCHEMAS.file.minSizeBytes) {
+        throw new Error(`Input Validation Rejected: File "${name}" is empty (0 bytes).`);
+    }
+    if (file.size > STRICT_INPUT_SCHEMAS.file.maxSizeBytes) {
+        throw new Error(`Input Validation Rejected: File "${name}" exceeds the maximum allowed file size of 100MB.`);
+    }
+
+    // 3. Strict Binary Header / Magic Bytes format validation
+    if (schema.magic && schema.magic.length > 0) {
+        try {
+            const slice = file.slice(0, 8);
+            const buffer = await slice.arrayBuffer();
+            const header = new Uint8Array(buffer);
+            const isMatch = schema.magic.some(magicBytes => {
+                if (header.length < magicBytes.length) return false;
+                return magicBytes.every((b, i) => header[i] === b);
+            });
+            if (!isMatch && ext !== 'csv') {
+                throw new Error(`Input Validation Rejected: File "${name}" binary header does not match declared .${ext} format. Malformed or disguised files are strictly rejected.`);
+            }
+        } catch (e) {
+            if (e.message.startsWith('Input Validation Rejected')) throw e;
+        }
+    }
+
+    return true;
+}
+
+async function handleFiles(files) {
     if (!files || files.length === 0) return;
     resultCard.style.display = 'none';
 
+    // Strict schema validation for each selected file
+    const validBatch = [];
+    for (let i = 0; i < files.length; i++) {
+        try {
+            await validateFileInputStrict(files[i], currentTool);
+            validBatch.push(files[i]);
+        } catch (err) {
+            alert(err.message);
+            fileInput.value = '';
+            return;
+        }
+    }
+
     if (fileInput.multiple) {
-        for (let i = 0; i < files.length; i++) {
-            selectedFiles.push(files[i]);
+        for (let i = 0; i < validBatch.length; i++) {
+            selectedFiles.push(validBatch[i]);
         }
     } else {
-        selectedFiles = [files[0]];
+        selectedFiles = [validBatch[0]];
     }
 
     // Interactive Split & Delete Studio
@@ -244,6 +337,7 @@ function handleFiles(files) {
         launchPdfEditor();
     }
 }
+
 
 function getFileIcon(filename) {
     const ext = filename.split('.').pop().toLowerCase();
