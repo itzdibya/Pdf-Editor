@@ -705,6 +705,26 @@ editorNextPage.addEventListener('click', async () => {
     }
 });
 
+if (editorZoomInBtn) {
+    editorZoomInBtn.addEventListener('click', async () => {
+        if (editorState.scale < 3.0) {
+            saveCurrentPageDrawCanvas();
+            editorState.scale = Math.min(3.0, +(editorState.scale + 0.25).toFixed(2));
+            await renderEditorCurrentPage();
+        }
+    });
+}
+
+if (editorZoomOutBtn) {
+    editorZoomOutBtn.addEventListener('click', async () => {
+        if (editorState.scale > 0.5) {
+            saveCurrentPageDrawCanvas();
+            editorState.scale = Math.max(0.5, +(editorState.scale - 0.25).toFixed(2));
+            await renderEditorCurrentPage();
+        }
+    });
+}
+
 function saveCurrentPageDrawCanvas() {
     const pageObj = editorState.pagesData[editorState.currentPage];
     if (pageObj) {
