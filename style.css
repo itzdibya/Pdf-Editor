@@ -227,6 +227,11 @@ main {
     color: #D97706;
 }
 
+.office-compress-icon {
+    background: #EFF6FF;
+    color: #2563EB;
+}
+
 .tool-card h3 {
     font-size: 19px;
     font-weight: 700;
@@ -258,6 +263,7 @@ main {
 .tag-pdf { background: #FEF2F2; color: var(--primary-red); }
 .tag-compress { background: #FFEDD5; color: var(--compress-orange); }
 .tag-image { background: #FAF5FF; color: var(--image-purple); }
+.tag-office { background: #EFF6FF; color: #2563EB; }
 
 /* Tool Workspace Styles */
 .tool-workspace {
