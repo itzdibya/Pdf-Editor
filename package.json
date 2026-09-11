@@ -1,0 +1,19 @@
+{
+  "name": "pdf-suite",
+  "version": "1.0.0",
+  "description": "PDF & Image Suite - 100% In-Browser & Private",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"No test specified\""
+  },
+  "keywords": [
+    "pdf",
+    "editor",
+    "converter"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/speed-insights": "^1.1.0"
+  }
+}
