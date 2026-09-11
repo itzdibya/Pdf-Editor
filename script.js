@@ -52,6 +52,51 @@ let currentAccept = '.pdf';
 let selectedFiles = [];
 
 // =========================================================
+// Secure Error Handling & Information Disclosure Prevention
+// Prevents internal paths, stack traces, and library internals from leaking to users
+// =========================================================
+function sanitizeErrorMessage(error, defaultMessage = 'An unexpected error occurred while processing your document. Please try again.') {
+    // Log full error details to console/telemetry for debugging
+    console.error('[Diagnostic Details]:', error);
+
+    if (!error) return defaultMessage;
+    const msg = typeof error === 'string' ? error : (error.message || '');
+
+    // Allow intentional validation rejection messages
+    if (msg.startsWith('Input Validation Rejected:') || msg.startsWith('Schema Validation Error:')) {
+        return msg;
+    }
+
+    // Check for sensitive patterns: stack traces, file paths, SQL/database keywords, internal modules
+    const sensitivePatterns = [
+        /at\s+[\w\.\/<>]+\s+\(.*:\d+:\d+\)/i, // Stack trace lines
+        /[\\\/](home|var|usr|etc|tmp|Users|C:)[\\\/]/i, // Internal paths
+        /(select|insert|update|delete|drop|table|sqlite|postgres|mysql|mongodb)/i, // Database terms
+        /(eval|webpack|node_modules|wasm|heap|v8)/i // Internal runtimes
+    ];
+
+    if (sensitivePatterns.some(p => p.test(msg))) {
+        return defaultMessage;
+    }
+
+    // Known user-safe operational errors
+    if (/password|encrypted/i.test(msg)) {
+        return 'This document is encrypted or password-protected. Please unlock it before processing.';
+    }
+    if (/corrupt|invalid pdf|bad format/i.test(msg)) {
+        return 'The document appears to be corrupted or in an unsupported format. Please verify the file.';
+    }
+
+    return defaultMessage;
+}
+
+function showSafeUserError(error, defaultMessage) {
+    const safeMsg = sanitizeErrorMessage(error, defaultMessage);
+    alert(safeMsg);
+}
+
+
+// =========================================================
 // Category Filtering in Navigation
 // =========================================================
 navFilters.forEach(filter => {
