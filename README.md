@@ -2,7 +2,7 @@
 
 [![CI/CD - Build & Deploy to GitHub Pages](https://github.com/itzdibya/Pdf-Editor/actions/workflows/deploy.yml/badge.svg)](https://github.com/itzdibya/Pdf-Editor/actions/workflows/deploy.yml)
 
-A powerful, 100% in-browser, private, and client-side document and PDF manipulation suite. No files are uploaded to external servers; all conversions and edits take place directly inside the user's browser.
+A powerful, 100% in-browser, private, and client-side document and PDF manipulation suite. No files are uploaded to servers; all conversions and edits take place directly inside the user's browser.
 
 🌐 **Live URL**: [https://itzdibya.github.io/Pdf-Editor/](https://itzdibya.github.io/Pdf-Editor/)
 
