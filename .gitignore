@@ -31,3 +31,14 @@ scratch/
 
 # Node modules (if ever added)
 node_modules/
+
+# Environment Variables and Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+credentials.json
+secrets.json

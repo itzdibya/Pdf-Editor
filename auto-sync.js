@@ -11,7 +11,7 @@ const path = require('path');
 
 const WORKSPACE_DIR = __dirname;
 const DEBOUNCE_MS = 8000; // Wait 8 seconds after the last file edit before committing
-const IGNORED_PATHS = ['.git', 'node_modules', '.tmp', 'scratch'];
+const IGNORED_PATHS = ['.git', 'node_modules', '.tmp', 'scratch', '.env'];
 
 let syncTimeout = null;
 let isSyncing = false;
