@@ -3365,33 +3365,62 @@ function updateSplitUI() {
     }
 }
 
-// Range Parser Utility
-function parseRangeExpression(inputStr, maxPages) {
-    const matched = new Set();
-    if (!inputStr || !inputStr.trim()) return matched;
+// Strict Schema Range Parser Utility
+function validateAndParseRangeExpressionStrict(inputStr, maxPages) {
+    if (typeof inputStr !== 'string') {
+        return { valid: false, error: 'Input Validation Rejected: Page range input must be a string.' };
+    }
+    const trimmed = inputStr.trim();
+    if (!trimmed) {
+        return { valid: false, error: 'Input Validation Rejected: Page range expression cannot be empty.' };
+    }
+    if (trimmed.length > STRICT_INPUT_SCHEMAS.pageRange.maxLength) {
+        return { valid: false, error: `Input Validation Rejected: Range expression exceeds maximum length of ${STRICT_INPUT_SCHEMAS.pageRange.maxLength} characters.` };
+    }
+    if (!STRICT_INPUT_SCHEMAS.pageRange.pattern.test(trimmed)) {
+        return { valid: false, error: 'Input Validation Rejected: Invalid range format. Expected format like "1-3, 5, 8-10" using positive numbers only.' };
+    }
 
-    const parts = inputStr.split(/[,;\s]+/);
-    for (const part of parts) {
-        if (!part) continue;
-        if (part.includes('-')) {
-            const [startStr, endStr] = part.split('-');
-            const start = parseInt(startStr, 10);
-            const end = parseInt(endStr, 10);
-            if (!isNaN(start) && !isNaN(end)) {
-                const min = Math.max(1, Math.min(start, end));
-                const max = Math.min(maxPages, Math.max(start, end));
-                for (let i = min; i <= max; i++) {
-                    matched.add(i);
-                }
+    const tokens = trimmed.split(',').map(s => s.trim());
+    const matched = new Set();
+
+    for (const token of tokens) {
+        if (token.includes('-')) {
+            const parts = token.split('-');
+            if (parts.length !== 2) {
+                return { valid: false, error: `Input Validation Rejected: Malformed range segment "${token}".` };
+            }
+            const start = parseInt(parts[0], 10);
+            const end = parseInt(parts[1], 10);
+            if (isNaN(start) || isNaN(end) || start < 1 || end < 1) {
+                return { valid: false, error: 'Input Validation Rejected: Page numbers must be integers >= 1.' };
+            }
+            if (start > end) {
+                return { valid: false, error: `Input Validation Rejected: Range start (${start}) cannot be greater than end (${end}).` };
+            }
+            if (start > maxPages || end > maxPages) {
+                return { valid: false, error: `Input Validation Rejected: Range "${start}-${end}" exceeds document page count of ${maxPages}.` };
+            }
+            for (let i = start; i <= end; i++) {
+                matched.add(i);
             }
         } else {
-            const num = parseInt(part, 10);
-            if (!isNaN(num) && num >= 1 && num <= maxPages) {
-                matched.add(num);
+            const num = parseInt(token, 10);
+            if (isNaN(num) || num < 1) {
+                return { valid: false, error: 'Input Validation Rejected: Page number must be an integer >= 1.' };
             }
+            if (num > maxPages) {
+                return { valid: false, error: `Input Validation Rejected: Page ${num} exceeds document page count of ${maxPages}.` };
+            }
+            matched.add(num);
         }
     }
-    return matched;
+    return { valid: true, pages: matched };
+}
+
+function parseRangeExpression(inputStr, maxPages) {
+    const res = validateAndParseRangeExpressionStrict(inputStr, maxPages);
+    return res.valid ? res.pages : new Set();
 }
 
 // Toolbar Action Listeners
@@ -3439,12 +3468,12 @@ if (splitRestoreAllBtn) {
 if (splitRangeDeleteBtn) {
     splitRangeDeleteBtn.addEventListener('click', () => {
         const query = (splitRangeInput.value || '').trim();
-        const pages = parseRangeExpression(query, splitState.totalPages);
-        if (pages.size === 0) {
-            alert(`Please enter valid page numbers or ranges between 1 and ${splitState.totalPages} (e.g. "2, 4-6").`);
+        const res = validateAndParseRangeExpressionStrict(query, splitState.totalPages);
+        if (!res.valid) {
+            alert(res.error);
             return;
         }
-        for (const p of pages) {
+        for (const p of res.pages) {
             splitState.deletedPages.add(p);
             splitState.selectedPages.delete(p);
         }
@@ -3456,14 +3485,14 @@ if (splitRangeDeleteBtn) {
 if (splitRangeKeepBtn) {
     splitRangeKeepBtn.addEventListener('click', () => {
         const query = (splitRangeInput.value || '').trim();
-        const pagesToKeep = parseRangeExpression(query, splitState.totalPages);
-        if (pagesToKeep.size === 0) {
-            alert(`Please enter valid page numbers or ranges between 1 and ${splitState.totalPages} (e.g. "1, 3, 5-7").`);
+        const res = validateAndParseRangeExpressionStrict(query, splitState.totalPages);
+        if (!res.valid) {
+            alert(res.error);
             return;
         }
         splitState.deletedPages.clear();
         for (let p = 1; p <= splitState.totalPages; p++) {
-            if (!pagesToKeep.has(p)) {
+            if (!res.pages.has(p)) {
                 splitState.deletedPages.add(p);
             }
         }
@@ -3472,6 +3501,7 @@ if (splitRangeKeepBtn) {
         updateSplitUI();
     });
 }
+
 
 if (splitChangeFileBtn) {
     splitChangeFileBtn.addEventListener('click', () => {
