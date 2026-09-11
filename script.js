@@ -89,10 +89,12 @@ document.querySelectorAll('.tool-card').forEach(card => {
         supportedFormats.innerText = `Supported: ${currentAccept.toUpperCase().replace(/\./g, ' ')}`;
 
         // Show/hide compression options
-        if (currentTool === 'compress' || currentTool === 'compress-image') {
+        if (currentTool === 'compress' || currentTool === 'compress-image' || currentTool === 'compress-office') {
             compressionOptions.style.display = 'block';
             if (currentTool === 'compress-image') {
                 workspaceSubtitle.innerText = 'Compress single or multiple images with optimal visual quality';
+            } else if (currentTool === 'compress-office') {
+                workspaceSubtitle.innerText = 'Compress Word (.docx), Excel (.xlsx), and PowerPoint (.pptx) documents across 3 compression levels';
             } else {
                 workspaceSubtitle.innerText = 'Reduce PDF file size while preserving high document quality';
             }
@@ -109,9 +111,9 @@ document.querySelectorAll('.tool-card').forEach(card => {
         }
 
         // Adjust for multi-file tools
-        if (currentTool === 'merge' || currentTool === 'jpg-to-pdf' || currentTool === 'compress-image') {
+        if (currentTool === 'merge' || currentTool === 'jpg-to-pdf' || currentTool === 'compress-image' || currentTool === 'compress-office') {
             fileInput.multiple = true;
-            if (currentTool !== 'compress-image') {
+            if (currentTool !== 'compress-image' && currentTool !== 'compress-office') {
                 workspaceSubtitle.innerText = 'Select multiple files to combine into a single document';
             }
         } else if (currentTool === 'edit-pdf') {
