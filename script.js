@@ -2019,24 +2019,18 @@ async function compressOfficeDocuments() {
     const levelRadio = document.querySelector('input[name="compression-level"]:checked');
     const level = levelRadio ? levelRadio.value : 'recommended';
 
-    // Aggressive optimization thresholds
-    let maxDimension = 1200;
-    let quality = 0.65;
-    let deflateLevel = 9;
-    let convertOpaquePng = true;
+    // Compression profiles - 100% document structure preserving
+    let maxDimension = 1280;
+    let jpegQuality = 0.65;
     let levelLabel = 'Good Compression';
 
     if (level === 'extreme') {
-        maxDimension = 800;
-        quality = 0.40;
-        deflateLevel = 9;
-        convertOpaquePng = true;
+        maxDimension = 850;
+        jpegQuality = 0.45;
         levelLabel = 'Extreme Compression';
     } else if (level === 'low') {
-        maxDimension = 1800;
-        quality = 0.82;
-        deflateLevel = 6;
-        convertOpaquePng = false;
+        maxDimension = 1920;
+        jpegQuality = 0.84;
         levelLabel = 'Less Compression';
     }
 
@@ -2047,23 +2041,6 @@ async function compressOfficeDocuments() {
     const formatSize = (bytes) => bytes > 1024 * 1024 
         ? (bytes / (1024 * 1024)).toFixed(2) + ' MB'
         : (bytes / 1024).toFixed(1) + ' KB';
-
-    // Helper: detect if a canvas contains any transparent pixels
-    function isCanvasOpaque(canvas, ctx) {
-        try {
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-            const totalPixels = canvas.width * canvas.height;
-            const step = totalPixels > 250000 ? 16 : 4;
-            for (let i = 3; i < imgData.length; i += step) {
-                if (imgData[i] < 245) {
-                    return false; // Found transparent pixel
-                }
-            }
-            return true; // Completely opaque
-        } catch (e) {
-            return false;
-        }
-    }
 
     for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i];
@@ -2080,30 +2057,24 @@ async function compressOfficeDocuments() {
         // Load document zip archive
         const zip = await JSZip.loadAsync(file);
 
-        // Analyze archive contents
+        // Scan exclusively for embedded media images inside user document media folders
+        // Preserving all XMLs, theme definitions, and relationship files completely intact
         const mediaEntries = [];
         const videoAudioEntries = [];
-        const relsEntries = [];
-        let totalMediaOriginalBytes = 0;
         let totalVideoAudioBytes = 0;
 
         zip.forEach((relativePath, zipEntry) => {
             if (zipEntry.dir) return;
 
-            if (/\.(png|jpe?g|bmp|webp|tiff?)$/i.test(relativePath)) {
+            // Target user media in word/media/, ppt/media/, or xl/media/
+            if (/(^|\/)(word|ppt|xl)\/media\/.*\.(jpe?g|png|bmp|webp)$/i.test(relativePath)) {
                 mediaEntries.push({ path: relativePath, entry: zipEntry });
-            } else if (/\.(mp4|mov|m4a|mp3|wav|avi|wmv|mkv|flv)$/i.test(relativePath)) {
+            } else if (/\.(mp4|mov|m4a|mp3|wav|avi|wmv|mkv)$/i.test(relativePath)) {
                 videoAudioEntries.push({ path: relativePath, entry: zipEntry });
-            }
-
-            if (relativePath.endsWith('.rels')) {
-                relsEntries.push({ path: relativePath, entry: zipEntry });
             }
         });
 
         let optimizedImagesCount = 0;
-        let convertedPngToJpgCount = 0;
-        const renames = []; // { oldFileName, newFileName }
 
         if (mediaEntries.length > 0) {
             for (let m = 0; m < mediaEntries.length; m++) {
@@ -2112,8 +2083,6 @@ async function compressOfficeDocuments() {
 
                 try {
                     const rawBytes = await zipEntry.async('uint8array');
-                    totalMediaOriginalBytes += rawBytes.length;
-
                     const isJpeg = /\.(jpe?g)$/i.test(relPath);
                     const isPng = /\.png$/i.test(relPath);
 
@@ -2149,35 +2118,19 @@ async function compressOfficeDocuments() {
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        let outType = isJpeg ? 'image/jpeg' : 'image/png';
-                        let canConvertToJpg = false;
+                        // CRITICAL: Preserve the exact same file format and name to avoid OpenXML corruption!
+                        // JPEGs stay JPEGs, PNGs stay PNGs.
+                        const outType = isJpeg ? 'image/jpeg' : 'image/png';
+                        const outQuality = isJpeg ? jpegQuality : undefined;
+                        const compressedImgBlob = await new Promise(resolve => canvas.toBlob(resolve, outType, outQuality));
 
-                        if (isPng && convertOpaquePng) {
-                            if (isCanvasOpaque(canvas, ctx)) {
-                                outType = 'image/jpeg';
-                                canConvertToJpg = true;
-                            }
-                        }
-
-                        const compressedImgBlob = await new Promise(resolve => canvas.toBlob(resolve, outType, quality));
-
-                        if (compressedImgBlob) {
+                        if (compressedImgBlob && compressedImgBlob.size > 0) {
                             const newBuffer = await compressedImgBlob.arrayBuffer();
-                            
-                            // Only replace if size was reduced
-                            if (newBuffer.byteLength < rawBytes.length) {
-                                if (canConvertToJpg) {
-                                    const oldFileName = relPath.split('/').pop();
-                                    const newFileName = oldFileName.replace(/\.png$/i, '.jpg');
-                                    const newRelPath = relPath.replace(/\.png$/i, '.jpg');
+                            const newUint8 = new Uint8Array(newBuffer);
 
-                                    zip.remove(relPath);
-                                    zip.file(newRelPath, newBuffer);
-                                    renames.push({ oldFileName, newFileName });
-                                    convertedPngToJpgCount++;
-                                } else {
-                                    zip.file(relPath, newBuffer);
-                                }
+                            // Only replace in-place if size was actually reduced
+                            if (newUint8.length < rawBytes.length) {
+                                zip.file(relPath, newUint8, { binary: true });
                                 optimizedImagesCount++;
                             }
                         }
@@ -2185,40 +2138,6 @@ async function compressOfficeDocuments() {
                 } catch (imgErr) {
                     console.warn(`Could not optimize ${relPath}:`, imgErr);
                 }
-            }
-        }
-
-        // If any PNGs were converted to JPG, update all .rels files and [Content_Types].xml
-        if (renames.length > 0) {
-            for (let r = 0; r < relsEntries.length; r++) {
-                try {
-                    let relContent = await relsEntries[r].entry.async('string');
-                    let modified = false;
-                    for (const rn of renames) {
-                        if (relContent.includes(rn.oldFileName)) {
-                            relContent = relContent.split(rn.oldFileName).join(rn.newName);
-                            modified = true;
-                        }
-                    }
-                    if (modified) {
-                        zip.file(relsEntries[r].path, relContent);
-                    }
-                } catch (rErr) {
-                    console.warn('Error updating .rels file:', rErr);
-                }
-            }
-
-            try {
-                const ctEntry = zip.file('[Content_Types].xml');
-                if (ctEntry) {
-                    let ctText = await ctEntry.async('string');
-                    if (!ctText.includes('Extension="jpg"') && !ctText.includes('Extension="jpeg"')) {
-                        ctText = ctText.replace('</Types>', '<Default Extension="jpg" ContentType="image/jpeg"/><Default Extension="jpeg" ContentType="image/jpeg"/></Types>');
-                        zip.file('[Content_Types].xml', ctText);
-                    }
-                }
-            } catch (ctErr) {
-                console.warn('Error updating [Content_Types].xml:', ctErr);
             }
         }
 
@@ -2230,17 +2149,18 @@ async function compressOfficeDocuments() {
             } catch (e) {}
         }
 
-        setProcessing(true, `Compressing & rebuilding ${file.name}...`);
+        setProcessing(true, `Packaging compressed ${file.name}...`);
+        // Standard DEFLATE compression compatible with all versions of Microsoft Office
         const compressedBlob = await zip.generateAsync({
             type: 'blob',
             mimeType: docMime,
             compression: 'DEFLATE',
-            compressionOptions: { level: deflateLevel }
+            compressionOptions: { level: 6 }
         }, (metadata) => {
             setProcessing(true, `Rebuilding ${file.name} (${Math.round(metadata.percent)}%)...`);
         });
 
-        // Ensure we don't return a file larger than original
+        // If compressed size is smaller, use compressed version; otherwise keep original
         const finalBlob = (compressedBlob.size <= file.size) ? compressedBlob : file;
         totalCompressed += finalBlob.size;
 
@@ -2252,12 +2172,11 @@ async function compressOfficeDocuments() {
             blob: finalBlob,
             mime: docMime,
             optimizedImages: optimizedImagesCount,
-            convertedPngs: convertedPngToJpgCount,
             videoAudioBytes: totalVideoAudioBytes,
             videoAudioCount: videoAudioEntries.length
         });
 
-        // Trigger download of this file
+        // Trigger download of the verified file
         downloadFile(finalBlob, outName, docMime);
     }
 
@@ -2271,8 +2190,7 @@ async function compressOfficeDocuments() {
     let filesSummaryHtml = processedFiles.map(f => {
         const fileSaved = f.originalSize > 0 ? Math.max(0, Math.round(((f.originalSize - f.compressedSize) / f.originalSize) * 100)) : 0;
         let detailHints = [];
-        if (f.optimizedImages > 0) detailHints.push(`${f.optimizedImages} image${f.optimizedImages > 1 ? 's' : ''} optimized`);
-        if (f.convertedPngs > 0) detailHints.push(`${f.convertedPngs} opaque PNG${f.convertedPngs > 1 ? 's' : ''} converted to JPG`);
+        if (f.optimizedImages > 0) detailHints.push(`${f.optimizedImages} embedded image${f.optimizedImages > 1 ? 's' : ''} optimized`);
         if (f.videoAudioCount > 0) detailHints.push(`Notice: ${f.videoAudioCount} embedded video/audio (${formatSize(f.videoAudioBytes)}) preserved`);
 
         return `<div style="display: flex; flex-direction: column; gap: 4px; width: 100%; font-size: 13px; padding: 6px 0; border-bottom: 1px dashed #A7F3D0;">
