@@ -327,6 +327,10 @@ processBtn.addEventListener('click', async () => {
                 setProcessing(true, 'Compressing image(s) in browser...');
                 await compressImages();
                 break;
+            case 'compress-office':
+                setProcessing(true, 'Analyzing & compressing Office files (.docx, .xlsx, .pptx)...');
+                await compressOfficeDocuments();
+                break;
             case 'pdf-to-word':
                 setProcessing(true, 'Extracting text & generating Word (.docx)...');
                 await convertPdfToWord();
