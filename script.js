@@ -773,12 +773,27 @@ window.addEventListener('keydown', (e) => {
 });
 
 editorFontSize.addEventListener('change', (e) => {
-    editorState.fontSize = parseInt(e.target.value);
+    const rawVal = e.target.value;
+    const num = Number(rawVal);
+    const schema = STRICT_INPUT_SCHEMAS.editor.fontSize;
+    if (!Number.isInteger(num) || num < schema.min || num > schema.max) {
+        alert(`Input Validation Rejected: Font size must be an integer between ${schema.min} and ${schema.max}.`);
+        e.target.value = editorState.fontSize;
+        return;
+    }
+    editorState.fontSize = num;
 });
 
 editorColorPicker.addEventListener('input', (e) => {
-    editorState.color = e.target.value;
+    const rawVal = e.target.value;
+    if (typeof rawVal !== 'string' || !STRICT_INPUT_SCHEMAS.editor.colorPattern.test(rawVal)) {
+        alert('Input Validation Rejected: Color must be a valid hex color format (#RGB or #RRGGBB).');
+        e.target.value = editorState.color;
+        return;
+    }
+    editorState.color = rawVal;
 });
+
 
 editorBoldBtn.addEventListener('click', () => {
     editorState.bold = !editorState.bold;
