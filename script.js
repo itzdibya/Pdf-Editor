@@ -315,7 +315,15 @@ async function validateFileInputStrict(file, toolId) {
         throw new Error(`Input Validation Rejected: File "${name}" has unsupported format (.${ext || 'unknown'}). Expected format: ${schema.extensions.map(e => '.' + e).join(', ')}.`);
     }
 
-    // 2. Strict size length validation
+    // 2. Strict MIME type validation (when reported by browser)
+    if (file.type && schema.mimeTypes && schema.mimeTypes.length > 0) {
+        const reportedMime = file.type.toLowerCase();
+        if (!schema.mimeTypes.includes(reportedMime) && reportedMime !== 'application/octet-stream') {
+            throw new Error(`Input Validation Rejected: File "${name}" reported MIME type "${reportedMime}" is not permitted for this operation.`);
+        }
+    }
+
+    // 3. Strict size length validation
     if (file.size < STRICT_INPUT_SCHEMAS.file.minSizeBytes) {
         throw new Error(`Input Validation Rejected: File "${name}" is empty (0 bytes).`);
     }
