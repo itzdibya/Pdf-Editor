@@ -3605,8 +3605,7 @@ async function exportNewPdfWithoutDeletedPages() {
             </div>
         `;
     } catch (err) {
-        console.error('Failed to generate new PDF:', err);
-        alert(`Error generating PDF: ${err.message || err}`);
+        showSafeUserError(err, 'An error occurred while compiling the new PDF document. Please try again.');
     } finally {
         setProcessing(false);
     }
@@ -3640,8 +3639,7 @@ async function splitKeptPagesAsSeparateFiles() {
             downloadFile(singleBytes, `${originalBase}_page_${pageNum}.pdf`, 'application/pdf');
         }
     } catch (err) {
-        console.error('Failed to split separate pages:', err);
-        alert(`Error splitting pages: ${err.message || err}`);
+        showSafeUserError(err, 'An error occurred while extracting individual pages. Please try again.');
     } finally {
         setProcessing(false);
     }
