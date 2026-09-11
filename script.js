@@ -506,8 +506,7 @@ processBtn.addEventListener('click', async () => {
                 alert(`Tool "${currentTool}" is currently under development.`);
         }
     } catch (error) {
-        console.error("Conversion error:", error);
-        alert(`An error occurred: ${error.message || error}`);
+        showSafeUserError(error, 'An unexpected error occurred during document conversion. Please check your file and try again.');
     } finally {
         if (currentTool !== 'edit-pdf') {
             setProcessing(false);
@@ -1979,8 +1978,7 @@ editorSaveBtn.addEventListener('click', async () => {
         downloadFile(finalPdfBytes, `${getBaseFilename(editorState.fileName)}_edited.pdf`, 'application/pdf');
 
     } catch (err) {
-        console.error("PDF save error:", err);
-        alert(`Failed to save edited PDF: ${err.message}`);
+        showSafeUserError(err, 'Failed to save edited PDF. Please check your text inputs and annotations and try again.');
     } finally {
         editorSaveBtn.disabled = false;
         editorSaveBtn.innerHTML = '<i class="fa-solid fa-download"></i> Save & Download PDF';
@@ -3219,9 +3217,8 @@ async function initSplitStudio(file) {
         renderAllSplitThumbnails(currentSession);
 
     } catch (err) {
-        console.error('Failed to load PDF in Split Studio:', err);
         setProcessing(false);
-        alert(`Could not load PDF: ${err.message || err}`);
+        showSafeUserError(err, 'Could not load PDF document. Please verify the file is not damaged or password-protected.');
         resetSplitStudio();
         updatePreview();
     }
