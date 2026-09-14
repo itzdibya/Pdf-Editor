@@ -20,6 +20,7 @@ const navFilters = document.querySelectorAll('.nav-filter');
 const compressionOptions = document.getElementById('compression-options');
 const excelOptions = document.getElementById('excel-options');
 const resultCard = document.getElementById('result-card');
+const seoContent = document.getElementById('seo-content');
 
 // PDF Editor Studio Elements
 const pdfEditorStudio = document.getElementById('pdf-editor-studio');
