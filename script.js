@@ -247,6 +247,23 @@ if (headerLogo) {
     });
 }
 
+// Footer Quick Tool Navigation Links
+document.querySelectorAll('.footer-tool-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        const toolName = link.dataset.tool;
+        if (!toolName) return;
+        e.preventDefault();
+        const targetCard = document.querySelector(`.tool-card[data-tool="${toolName}"]`);
+        if (targetCard) {
+            if (toolWorkspace.style.display === 'block') {
+                goBackToGrid();
+            }
+            targetCard.click();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+});
+
 // Drag and drop events
 uploadArea.addEventListener('dragover', (e) => {
     e.preventDefault();
