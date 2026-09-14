@@ -194,6 +194,23 @@ main {
     color: #DC2626;
 }
 
+.kw-badge.kw-highlight {
+    background: linear-gradient(135deg, #FFF1F2, #FFE4E6);
+    border-color: #FDA4AF;
+    color: #BE123C;
+    font-weight: 700;
+}
+
+.kw-badge.kw-highlight i {
+    color: #E11D48;
+}
+
+.kw-badge.kw-highlight:hover {
+    background: linear-gradient(135deg, #FFE4E6, #FECDD3);
+    border-color: #FB7185;
+    box-shadow: 0 4px 14px rgba(225, 29, 72, 0.15);
+}
+
 /* Tools Grid */
 .tools-grid {
     display: grid;
