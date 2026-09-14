@@ -4,7 +4,7 @@
 
 A powerful, 100% in-browser, private, and client-side document and PDF manipulation suite. No files are uploaded to servers; all conversions and edits take place directly inside the user's browser.
 
-🌐 **Live URL**: [https://itzdibya.github.io/Pdf-Editor/](https://itzdibya.github.io/Pdf-Editor/)
+🌐 **Live URL**: [https://pdf-editor-dibya7.vercel.app/](https://pdf-editor-dibya7.vercel.app/)
 
 ---
 
