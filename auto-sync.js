@@ -13,13 +13,20 @@ const WORKSPACE_DIR = __dirname;
 const DEBOUNCE_MS = 8000; // Wait 8 seconds after the last file edit before committing
 const IGNORED_PATHS = ['.git', 'node_modules', '.tmp', 'scratch', '.env'];
 
+// Toggle to pause/resume auto-sync
+const AUTO_SYNC_ENABLED = false;
+
 let syncTimeout = null;
 let isSyncing = false;
 
-console.log(`[Auto-Sync] Started monitoring workspace: ${WORKSPACE_DIR}`);
+console.log(`[Auto-Sync] Auto-deploy to GitHub is currently PAUSED.`);
 
 // Check git status and push
 function syncToGitHub() {
+    if (!AUTO_SYNC_ENABLED) {
+        return;
+    }
+
     if (isSyncing) {
         console.log('[Auto-Sync] Sync already in progress, queuing...');
         triggerSync();
