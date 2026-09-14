@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="shieldGrad" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E5322D"/>
+      <stop offset="100%" stop-color="#991B1B"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="2" width="64" height="62" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <path d="M32 4L10 13V31C10 46 19.5 55.5 32 60C44.5 55.5 54 46 54 31V13L32 4Z" fill="url(#shieldGrad)" filter="url(#shadow)"/>
+  <!-- Folded Document Shape -->
+  <path d="M24 20H36L42 26V44H24V20Z" fill="#FFFFFF" fill-opacity="0.95"/>
+  <path d="M36 20V26H42L36 20Z" fill="#CBD5E1"/>
+  <!-- Document Content Lines -->
+  <rect x="28" y="30" width="10" height="2.5" rx="1.25" fill="#E5322D"/>
+  <rect x="28" y="35" width="12" height="2" rx="1" fill="#64748B"/>
+  <rect x="28" y="39" width="8" height="2" rx="1" fill="#64748B"/>
+</svg>

@@ -1,0 +1,8 @@
+# Robots.txt for PDF Suite
+# Allow all search engine crawlers to crawl and index all pages and assets
+
+User-agent: *
+Allow: /
+
+# Sitemap URL
+Sitemap: https://itzdibya.github.io/Pdf-Editor/sitemap.xml

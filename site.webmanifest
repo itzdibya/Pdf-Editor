@@ -1,0 +1,16 @@
+{
+  "name": "PDF Suite - In-Browser PDF Editor & Converter",
+  "short_name": "PDF Suite",
+  "description": "Free, 100% private, client-side PDF editor, converter, and compressor.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F4F6F9",
+  "theme_color": "#E5322D",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
