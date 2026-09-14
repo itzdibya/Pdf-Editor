@@ -5,13 +5,11 @@
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BRANCH="${1:-master}"
+
+echo "[Auto-Sync] Auto-deploy to GitHub is currently PAUSED."
+exit 0
+
 CHECK_INTERVAL_SECONDS=15
-
-echo "[Auto-Sync] Monitoring repository at $REPO_DIR (branch: $BRANCH) every $CHECK_INTERVAL_SECONDS seconds..."
-
-cd "$REPO_DIR" || exit 1
-
-while true; do
     # Check if there are modified, added, or deleted files
     if [[ -n $(git status --porcelain) ]]; then
         echo "[Auto-Sync] Detected changes at $(date)..."
