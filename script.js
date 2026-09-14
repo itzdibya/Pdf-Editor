@@ -213,6 +213,7 @@ function goBackToGrid() {
     toolWorkspace.style.display = 'none';
     toolsGrid.style.display = 'grid';
     document.querySelector('.hero').style.display = 'block';
+    if (seoContent) seoContent.style.display = 'block';
     selectedFiles = [];
     resultCard.style.display = 'none';
     updatePreview();
