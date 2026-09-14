@@ -175,6 +175,7 @@ document.querySelectorAll('.tool-card').forEach(card => {
 
         toolsGrid.style.display = 'none';
         document.querySelector('.hero').style.display = 'none';
+        if (seoContent) seoContent.style.display = 'none';
         toolWorkspace.style.display = 'block';
         
         // Reset state
