@@ -195,101 +195,112 @@
     </header>
 
     <main id="main-content">
-        <!-- Hero Section -->
+        <!-- Hero Section with Primary Search Intent Keywords -->
         <section class="hero">
-            <h1>Every tool you need to edit, convert, and compress documents</h1>
-            <p>100% Local & In-Browser. No files are uploaded to any server or API.</p>
+            <h1>Free Online PDF Editor, Converter & Compressor</h1>
+            <p>The 100% private, client-side document toolkit. Edit existing PDF text, convert PDF to Word, Excel, and JPG, compress file size, merge, and split pages directly in your browser with zero file uploads.</p>
+            
+            <!-- Quick Search Intent Keywords Bar (Clickable for instant tool access) -->
+            <div class="keyword-badges" id="keyword-badges">
+                <button type="button" class="kw-badge" data-tool="edit-pdf"><i class="fa-solid fa-pen-to-square"></i> Edit PDF Online Free</button>
+                <button type="button" class="kw-badge" data-tool="pdf-to-word"><i class="fa-solid fa-file-word"></i> PDF to Word Converter</button>
+                <button type="button" class="kw-badge" data-tool="pdf-to-excel"><i class="fa-solid fa-file-excel"></i> PDF to Excel</button>
+                <button type="button" class="kw-badge" data-tool="compress"><i class="fa-solid fa-file-zipper"></i> Compress PDF Online</button>
+                <button type="button" class="kw-badge" data-tool="merge"><i class="fa-solid fa-object-group"></i> Merge PDF Files</button>
+                <button type="button" class="kw-badge" data-tool="split"><i class="fa-solid fa-scissors"></i> Split & Delete Pages</button>
+                <button type="button" class="kw-badge kw-privacy" data-filter="all"><i class="fa-solid fa-shield-halved"></i> 100% Safe (No Uploads)</button>
+            </div>
         </section>
 
         <!-- Tools Grid -->
         <div class="tools-grid" id="tools-grid">
             
             <!-- EDIT PDF (FLAGSHIP TOOL) -->
-            <div class="tool-card featured-card" data-tool="edit-pdf" data-category="edit" data-accept=".pdf" data-title="Edit PDF Text & Annotate" data-action="Open in PDF Editor">
+            <div class="tool-card featured-card" data-tool="edit-pdf" data-category="edit" data-accept=".pdf" data-title="Edit PDF Text Online - Free PDF Editor" data-action="Open in PDF Editor">
                 <div class="icon edit-icon"><i class="fa-solid fa-pen-to-square"></i></div>
-                <h3>Edit PDF Text</h3>
-                <p>Click on existing PDF text to edit or replace it, add new text boxes, whiteout, and draw signatures.</p>
-                <span class="tool-tag tag-edit">Full PDF Editor</span>
+                <h3>Edit PDF Text Online</h3>
+                <p>Click on existing PDF text to edit, replace, or update words. Add custom text boxes, whiteout content, highlight, and draw signatures for free.</p>
+                <span class="tool-tag tag-edit">Full PDF Editor &bull; Free</span>
             </div>
 
             <!-- CONVERT FROM PDF -->
-            <div class="tool-card" data-tool="pdf-to-word" data-category="from-pdf" data-accept=".pdf" data-title="PDF to Word" data-action="Convert to Word (.docx)">
+            <div class="tool-card" data-tool="pdf-to-word" data-category="from-pdf" data-accept=".pdf" data-title="PDF to Word Converter (.docx)" data-action="Convert to Word (.docx)">
                 <div class="icon word-icon"><i class="fa-solid fa-file-word"></i></div>
-                <h3>PDF to Word</h3>
-                <p>Convert your PDF into an editable Word document (.docx) with reconstructed tables & formatting.</p>
-                <span class="tool-tag tag-word">PDF &rarr; DOCX</span>
+                <h3>PDF to Word Converter</h3>
+                <p>Convert your PDF into an editable Microsoft Word document (.docx) with reconstructed tables, typography, and clean formatting.</p>
+                <span class="tool-tag tag-word">PDF &rarr; DOCX Editable</span>
             </div>
 
-            <div class="tool-card" data-tool="pdf-to-excel" data-category="from-pdf" data-accept=".pdf" data-title="PDF to Excel" data-action="Convert to Excel (.xlsx)">
+            <div class="tool-card" data-tool="pdf-to-excel" data-category="from-pdf" data-accept=".pdf" data-title="PDF to Excel Converter (.xlsx)" data-action="Convert to Excel (.xlsx)">
                 <div class="icon excel-icon"><i class="fa-solid fa-file-excel"></i></div>
-                <h3>PDF to Excel</h3>
-                <p>Extract tabular data and text from PDF files into formatted Excel spreadsheets (.xlsx).</p>
-                <span class="tool-tag tag-excel">PDF &rarr; XLSX</span>
+                <h3>PDF to Excel Converter</h3>
+                <p>Extract tabular financial data, statements, and spreadsheets from PDF to formatted Microsoft Excel files (.xlsx) across single or multi-sheets.</p>
+                <span class="tool-tag tag-excel">PDF &rarr; XLSX Spreadsheet</span>
             </div>
 
-            <div class="tool-card" data-tool="pdf-to-jpg" data-category="from-pdf" data-accept=".pdf" data-title="PDF to JPG" data-action="Convert to JPG Images">
+            <div class="tool-card" data-tool="pdf-to-jpg" data-category="from-pdf" data-accept=".pdf" data-title="PDF to JPG Image Converter" data-action="Convert to JPG Images">
                 <div class="icon image-icon"><i class="fa-solid fa-file-image"></i></div>
-                <h3>PDF to JPG</h3>
-                <p>Convert each PDF page into high-resolution JPG images in seconds.</p>
-                <span class="tool-tag tag-image">PDF &rarr; JPG</span>
+                <h3>PDF to JPG Converter</h3>
+                <p>Convert each PDF page into high-resolution JPG or PNG images in seconds. Download individual pages or a convenient ZIP archive.</p>
+                <span class="tool-tag tag-image">PDF &rarr; High-Res JPG</span>
             </div>
 
             <!-- CONVERT TO PDF -->
-            <div class="tool-card" data-tool="word-to-pdf" data-category="to-pdf" data-accept=".docx,.doc" data-title="Word to PDF" data-action="Convert to PDF">
+            <div class="tool-card" data-tool="word-to-pdf" data-category="to-pdf" data-accept=".docx,.doc" data-title="Word to PDF Converter" data-action="Convert to PDF">
                 <div class="icon word-icon"><i class="fa-solid fa-file-arrow-up"></i></div>
-                <h3>Word to PDF</h3>
-                <p>Convert Microsoft Word documents (.docx) into standard PDF files with ease.</p>
+                <h3>Word to PDF Converter</h3>
+                <p>Convert Microsoft Word documents (.docx, .doc) into standard, print-ready PDF files with 100% vector typography fidelity.</p>
                 <span class="tool-tag tag-word">DOCX &rarr; PDF</span>
             </div>
 
-            <div class="tool-card" data-tool="excel-to-pdf" data-category="to-pdf" data-accept=".xlsx,.xls,.csv" data-title="Excel to PDF" data-action="Convert to PDF">
+            <div class="tool-card" data-tool="excel-to-pdf" data-category="to-pdf" data-accept=".xlsx,.xls,.csv" data-title="Excel to PDF Converter" data-action="Convert to PDF">
                 <div class="icon excel-icon"><i class="fa-solid fa-table"></i></div>
-                <h3>Excel to PDF</h3>
-                <p>Transform Excel workbooks (.xlsx, .xls, .csv) into clean, vector-rendered PDF documents.</p>
+                <h3>Excel to PDF Converter</h3>
+                <p>Transform Excel workbooks (.xlsx, .xls, .csv) into clean, vector-rendered PDF documents ready for printing and presentations.</p>
                 <span class="tool-tag tag-excel">XLSX &rarr; PDF</span>
             </div>
 
-            <div class="tool-card" data-tool="jpg-to-pdf" data-category="to-pdf" data-accept=".jpg,.jpeg,.png,.webp" data-title="JPG to PDF" data-action="Convert to PDF">
+            <div class="tool-card" data-tool="jpg-to-pdf" data-category="to-pdf" data-accept=".jpg,.jpeg,.png,.webp" data-title="JPG & PNG to PDF Converter" data-action="Convert to PDF">
                 <div class="icon image-icon"><i class="fa-solid fa-file-pdf"></i></div>
-                <h3>JPG to PDF</h3>
-                <p>Convert JPG & PNG images to PDF. Combine multiple images into a single PDF.</p>
-                <span class="tool-tag tag-image">JPG &rarr; PDF</span>
+                <h3>JPG & PNG to PDF</h3>
+                <p>Combine and convert JPG, PNG, and WebP images into a single PDF document. Rearrange and rotate images with instant preview.</p>
+                <span class="tool-tag tag-image">Images &rarr; Single PDF</span>
             </div>
 
             <!-- ORGANIZE & OPTIMIZE -->
-            <div class="tool-card" data-tool="compress" data-category="organize" data-accept=".pdf" data-title="Compress PDF" data-action="Compress PDF">
+            <div class="tool-card" data-tool="compress" data-category="organize" data-accept=".pdf" data-title="Compress PDF Online (Reduce File Size)" data-action="Compress PDF">
                 <div class="icon compress-icon"><i class="fa-solid fa-file-zipper"></i></div>
-                <h3>Compress PDF</h3>
-                <p>Reduce PDF file size while optimizing for maximal visual clarity in your browser.</p>
-                <span class="tool-tag tag-compress">PDF Compress</span>
+                <h3>Compress PDF Online</h3>
+                <p>Reduce PDF file size by up to 85% for email sharing while optimizing for visual clarity. Choose Good, Extreme, or Less compression.</p>
+                <span class="tool-tag tag-compress">Reduce PDF Size</span>
             </div>
 
-            <div class="tool-card" data-tool="compress-image" data-category="organize" data-accept=".jpg,.jpeg,.png,.webp" data-title="Compress Image" data-action="Compress Images">
+            <div class="tool-card" data-tool="compress-image" data-category="organize" data-accept=".jpg,.jpeg,.png,.webp" data-title="Compress Images (JPG, PNG, WebP)" data-action="Compress Images">
                 <div class="icon image-compress-icon"><i class="fa-solid fa-photo-film"></i></div>
-                <h3>Compress Image</h3>
-                <p>Reduce JPG, PNG, and WebP image sizes by up to 85% with client-side canvas optimization.</p>
-                <span class="tool-tag tag-image">Image Compress</span>
+                <h3>Compress Images Online</h3>
+                <p>Reduce JPG, PNG, and WebP image sizes by up to 85% with smart client-side canvas optimization and zero quality loss.</p>
+                <span class="tool-tag tag-image">JPG &bull; PNG &bull; WebP</span>
             </div>
 
-            <div class="tool-card" data-tool="compress-office" data-category="organize" data-accept=".docx,.xlsx,.pptx" data-title="Compress Word, Excel & PPT" data-action="Compress Documents">
+            <div class="tool-card" data-tool="compress-office" data-category="organize" data-accept=".docx,.xlsx,.pptx" data-title="Compress Word, Excel & PPT Files" data-action="Compress Documents">
                 <div class="icon office-compress-icon"><i class="fa-solid fa-file-zipper"></i></div>
                 <h3>Compress Office Files</h3>
-                <p>Reduce Word (.docx), Excel (.xlsx), and PowerPoint (.pptx) file sizes with Good, Extreme, or Less compression.</p>
+                <p>Reduce Word (.docx), Excel (.xlsx), and PowerPoint (.pptx) file sizes with custom compression levels for smooth email attachments.</p>
                 <span class="tool-tag tag-office">DOCX &bull; XLSX &bull; PPTX</span>
             </div>
 
-            <div class="tool-card" data-tool="merge" data-category="organize" data-accept=".pdf" data-title="Merge PDF" data-action="Merge PDFs">
+            <div class="tool-card" data-tool="merge" data-category="organize" data-accept=".pdf" data-title="Merge PDF Online (Combine PDF Files)" data-action="Merge PDFs">
                 <div class="icon merge-icon"><i class="fa-solid fa-object-group"></i></div>
-                <h3>Merge PDF</h3>
-                <p>Combine multiple PDF files into one single document in the exact order you want.</p>
-                <span class="tool-tag tag-pdf">PDF Merge</span>
+                <h3>Merge PDF Online</h3>
+                <p>Combine multiple PDF files into one single organized document. Drag and drop to reorder pages in the exact sequence you want.</p>
+                <span class="tool-tag tag-pdf">Combine PDF Files</span>
             </div>
 
-            <div class="tool-card" data-tool="split" data-category="organize" data-accept=".pdf" data-title="Split & Delete PDF Pages" data-action="Organize & Split Pages">
+            <div class="tool-card" data-tool="split" data-category="organize" data-accept=".pdf" data-title="Split PDF & Delete PDF Pages" data-action="Organize & Split Pages">
                 <div class="icon split-icon"><i class="fa-solid fa-scissors"></i></div>
-                <h3>Split & Delete Pages</h3>
-                <p>Delete unwanted pages, extract custom page ranges, or split a PDF into separate files.</p>
-                <span class="tool-tag tag-pdf">PDF Split & Delete</span>
+                <h3>Split PDF & Delete Pages</h3>
+                <p>Delete unwanted pages, extract custom page intervals (e.g. 2, 4-6), or split a multi-page PDF into separate files with visual thumbnails.</p>
+                <span class="tool-tag tag-pdf">Split & Delete Pages</span>
             </div>
 
         </div>
