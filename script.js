@@ -3738,3 +3738,12 @@ function downloadFile(content, filename, type) {
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
+
+// UAT Environment Isolation: Ensure sitemap & robots links are removed in UAT
+(function cleanUatSeoLinks() {
+    const host = window.location.hostname;
+    const isUat = host === 'localhost' || host === '127.0.0.1' || /^(\d{1,3}\.){3}\d{1,3}$/.test(host) || (window.location.port && window.location.port !== '80' && window.location.port !== '443');
+    if (isUat) {
+        document.querySelectorAll('.prod-only-seo').forEach(el => el.remove());
+    }
+})();
