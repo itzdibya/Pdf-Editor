@@ -264,6 +264,33 @@ document.querySelectorAll('.footer-tool-link').forEach(link => {
     });
 });
 
+// Quick Keyword Intent Badges & Directory Tag Buttons
+document.querySelectorAll('.kw-badge, .kw-tag-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const toolName = btn.dataset.tool;
+        const filterName = btn.dataset.filter;
+
+        if (toolName) {
+            e.preventDefault();
+            const targetCard = document.querySelector(`.tool-card[data-tool="${toolName}"]`);
+            if (targetCard) {
+                if (toolWorkspace.style.display === 'block') {
+                    goBackToGrid();
+                }
+                targetCard.click();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        } else if (filterName) {
+            e.preventDefault();
+            const targetFilter = document.querySelector(`.nav-filter[data-filter="${filterName}"]`);
+            if (targetFilter) {
+                targetFilter.click();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+    });
+});
+
 // Drag and drop events
 uploadArea.addEventListener('dragover', (e) => {
     e.preventDefault();
