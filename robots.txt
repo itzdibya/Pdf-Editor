@@ -5,4 +5,4 @@ User-agent: *
 Allow: /
 
 # Sitemap URL
-Sitemap: https://itzdibya.github.io/Pdf-Editor/sitemap.xml
+Sitemap: https://pdf-editor-dibya7.vercel.app/sitemap.xml
