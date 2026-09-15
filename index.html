@@ -202,15 +202,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Ambient Luminous Background Elements -->
+    <div class="ambient-background" aria-hidden="true">
+        <div class="ambient-glow glow-1"></div>
+        <div class="ambient-glow glow-2"></div>
+        <div class="ambient-glow glow-3"></div>
+        <div class="ambient-grid"></div>
+    </div>
+
     <header>
         <div class="header-main-row">
             <div class="logo" id="header-logo" title="Back to home page" role="button" tabindex="0">
-                <i class="fa-solid fa-file-shield"></i>
-                <span>PDF Suite</span>
+                <div class="logo-icon-box">
+                    <i class="fa-solid fa-file-shield"></i>
+                </div>
+                <span>PDF <span class="logo-accent">Suite</span></span>
             </div>
             <div class="security-badge">
-                <i class="fa-solid fa-lock"></i>
-                <span class="security-badge-text">100% In-Browser & Private</span>
+                <span class="live-dot"></span>
+                <i class="fa-solid fa-shield-halved"></i>
+                <span class="security-badge-text">100% In-Browser &bull; Zero Server Uploads</span>
             </div>
         </div>
         <nav class="nav-links">
@@ -218,14 +229,19 @@
             <a href="#" class="nav-filter" data-filter="edit">Edit PDF</a>
             <a href="#" class="nav-filter" data-filter="from-pdf">Convert from PDF</a>
             <a href="#" class="nav-filter" data-filter="to-pdf">Convert to PDF</a>
-            <a href="#" class="nav-filter" data-filter="organize">Organize & Optimize</a>
+            <a href="#" class="nav-filter" data-filter="organize">Organize &amp; Optimize</a>
         </nav>
     </header>
 
     <main id="main-content">
         <!-- Hero Section with Primary Search Intent Keywords -->
         <section class="hero">
-            <h1>Free Online PDF Editor (No Sign Up)</h1>
+            <div class="hero-badge">
+                <span class="hero-badge-pulse"></span>
+                <i class="fa-solid fa-lock"></i>
+                <span>Client-Side Document Studio &bull; 100% Private &bull; No Sign Up</span>
+            </div>
+            <h1>Free Online PDF Editor <span class="hero-gradient-text">(No Sign Up)</span></h1>
             <p>The 100% free online PDF editor with complete privacy, no sign up, no email, and zero file uploads. Edit existing PDF text, convert PDF to Word, Excel, and JPG, compress, merge, and split pages directly in your browser with total privacy.</p>
         </section>
 
@@ -234,6 +250,8 @@
             
             <!-- EDIT PDF (FLAGSHIP TOOL) -->
             <div class="tool-card featured-card" data-tool="edit-pdf" data-category="edit" data-accept=".pdf" data-title="Free Online PDF Editor (No Sign Up) - 100% Privacy" data-action="Open in PDF Editor">
+                <div class="card-top-shine"></div>
+                <div class="card-feature-pill"><i class="fa-solid fa-bolt"></i> Popular Studio</div>
                 <div class="icon edit-icon"><i class="fa-solid fa-pen-to-square"></i></div>
                 <h3>Edit PDF Text (No Sign Up)</h3>
                 <p>Click on existing PDF text to edit, replace, or update words with 100% privacy. Add custom text boxes, whiteout content, highlight, and draw signatures online with no sign up required.</p>
