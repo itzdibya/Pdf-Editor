@@ -207,6 +207,7 @@ header {
 .logo-accent {
     background: linear-gradient(135deg, #38BDF8 0%, #818CF8 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -339,6 +340,7 @@ main {
 .hero-gradient-text {
     background: linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #C084FC 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -1833,6 +1835,66 @@ main {
     outline: none;
     z-index: 100;
     min-width: 80px;
+}
+
+.pdf-text-block-actions {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 0;
+    display: flex;
+    gap: 6px;
+    background: #0F172A;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 4px 6px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    z-index: 120;
+    white-space: nowrap;
+}
+
+.pdf-action-btn {
+    padding: 4px 9px;
+    border-radius: 5px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: none;
+    transition: all 0.2s;
+}
+
+.pdf-action-save {
+    background: #10B981;
+    color: white;
+}
+
+.pdf-action-save:hover {
+    background: #059669;
+}
+
+.pdf-action-cancel {
+    background: #F43F5E;
+    color: white;
+}
+
+.pdf-action-cancel:hover {
+    background: #E11D48;
+}
+
+.pdf-text-block-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 2px 4px;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    font-weight: inherit;
+    width: 100%;
+    min-width: 60px;
+    box-sizing: border-box;
 }
 
 /* User Textbox, Whiteout Rect, Detected Box */
