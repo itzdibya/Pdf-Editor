@@ -339,8 +339,8 @@ main {
 
 .hero-gradient-text {
     background: linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #C084FC 100%);
-    -webkit-background-clip: text;
     background-clip: text;
+    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
