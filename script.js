@@ -3772,7 +3772,7 @@ function downloadFile(content, filename, type) {
         // Update meta theme-color tag dynamically
         const metaTheme = document.querySelector('meta[name="theme-color"]');
         if (metaTheme) {
-            metaTheme.setAttribute('content', isLight ? '#F8FAFC' : '#0A0E17');
+            metaTheme.setAttribute('content', isLight ? '#EEF2F6' : '#0A0E17');
         }
     }
 
