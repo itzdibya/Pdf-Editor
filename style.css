@@ -79,6 +79,10 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+    background-color: var(--bg-canvas);
+}
+
 body {
     background-color: var(--bg-canvas);
     color: var(--text-main);
