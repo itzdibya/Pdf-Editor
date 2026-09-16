@@ -3747,3 +3747,43 @@ function downloadFile(content, filename, type) {
         document.querySelectorAll('.prod-only-seo').forEach(el => el.remove());
     }
 })();
+
+// =========================================================
+// ANIMATED THEME SWITCHER (Dark & Light)
+// =========================================================
+(function initThemeSwitcher() {
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (!themeToggleBtn) return;
+
+    function getPreferredTheme() {
+        const saved = localStorage.getItem('pdf-suite-theme');
+        if (saved === 'light' || saved === 'dark') return saved;
+        return 'dark'; // Default to rich obsidian dark theme
+    }
+
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('pdf-suite-theme', theme);
+        const isLight = theme === 'light';
+        themeToggleBtn.setAttribute('aria-checked', isLight ? 'true' : 'false');
+        themeToggleBtn.classList.toggle('light-active', isLight);
+        themeToggleBtn.title = isLight ? 'Switch to Dark Theme' : 'Switch to Light Theme';
+
+        // Update meta theme-color tag dynamically
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) {
+            metaTheme.setAttribute('content', isLight ? '#F8FAFC' : '#0A0E17');
+        }
+    }
+
+    // Initialize state
+    const currentTheme = getPreferredTheme();
+    applyTheme(currentTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+        const activeTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const nextTheme = activeTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+    });
+})();
+
