@@ -27,6 +27,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Theme Preference Initialization (Prevents flash of wrong theme) -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem('pdf-suite-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 
     <!-- UAT Environment Filter: Automatically hides production-only SEO entries in UAT/local environments -->
     <script>
